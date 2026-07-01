@@ -1,6 +1,9 @@
 # Secrets and local-only files
 .env
 .env.*
+!.env.example
+secrets.local.env
+secrets.env
 *.key
 *.pem
 *.p12
@@ -11,10 +14,23 @@
 *.mobileconfig
 *.conf
 *.json.secret
-*secret*
+secret*.env
+*.secret
+*.secrets
+!secrets.example.env
 *token*
 *subscription*
 *private*
+
+# Rendered sensitive deployment output
+output/*
+!output/.gitkeep
+
+# Local runnable scripts with real paths or parameters
+*.local.ps1
+*.local.sh
+*.local.cmd
+*.local.bat
 
 # Client exports that may contain real nodes or subscription data
 clash.yaml
@@ -32,11 +48,4 @@ qrcode*.png
 Thumbs.db
 .idea/
 .vscode/
-
-
-# Local runnable scripts with real paths or parameters
-*.local.ps1
-*.local.sh
-*.local.cmd
-*.local.bat
 

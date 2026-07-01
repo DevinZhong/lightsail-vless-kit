@@ -1,0 +1,7 @@
+*.sh text eol=lf
+*.tpl text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+.env.example text eol=lf
+secrets.example.env text eol=lf

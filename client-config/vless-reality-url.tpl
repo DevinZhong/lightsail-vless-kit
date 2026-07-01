@@ -1,0 +1,1 @@
+vless://{{VLESS_UUID}}@{{SERVER_IP}}:443?encryption=none&security=reality&sni={{REALITY_SERVER_NAME}}&fp={{REALITY_FINGERPRINT}}&pbk={{REALITY_PUBLIC_KEY}}&sid={{REALITY_SHORT_ID}}&type=tcp&flow=xtls-rprx-vision#{{NODE_NAME}}-reality
