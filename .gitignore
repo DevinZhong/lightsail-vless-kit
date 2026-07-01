@@ -1,0 +1,42 @@
+# Secrets and local-only files
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.csr
+*.ovpn
+*.mobileconfig
+*.conf
+*.json.secret
+*secret*
+*token*
+*subscription*
+*private*
+
+# Client exports that may contain real nodes or subscription data
+clash.yaml
+clash.yml
+config.yaml
+config.yml
+hiddify*.json
+vless*.txt
+nodes*.txt
+subscribe*.txt
+qrcode*.png
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+
+# Local runnable scripts with real paths or parameters
+*.local.ps1
+*.local.sh
+*.local.cmd
+*.local.bat
+
