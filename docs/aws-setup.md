@@ -35,10 +35,12 @@ JSON：
         "lightsail:DeleteInstance",
         "lightsail:OpenInstancePublicPorts",
         "lightsail:CloseInstancePublicPorts",
+        "lightsail:CreateKeyPair",
         "lightsail:ImportKeyPair",
         "lightsail:GetKeyPair",
         "lightsail:GetKeyPairs",
         "lightsail:DeleteKeyPair",
+        "lightsail:DownloadDefaultKeyPair",
         "lightsail:AllocateStaticIp",
         "lightsail:AttachStaticIp",
         "lightsail:DetachStaticIp",
@@ -58,7 +60,8 @@ JSON：
 
 说明：
 
-- `lightsail:ImportKeyPair` 用于上传本地 SSH 公钥到 Lightsail。
+- `lightsail:CreateKeyPair` 用于让 Lightsail 生成项目专用 SSH key pair。
+- `lightsail:ImportKeyPair` 用于上传本地 SSH 公钥到 Lightsail；当前不作为首选路线。
 - `lightsail:GetKeyPairs` 用于确认 key pair 是否已存在。
 - `lightsail:DeleteKeyPair` 是可选清理权限；不想给删除权限时可以移除。
 - 不要使用 `LightsailExportAccess`，它不是创建实例所需的权限。
@@ -88,27 +91,19 @@ AWS_AZ=ap-northeast-1a
 
 ## SSH Key Pair
 
-建议使用项目专用 RSA key pair，不复用日常 SSH key：
+首选：让 Lightsail 创建项目专用 key pair，并把私钥保存到本机用户 `.ssh` 目录。私钥不要放进项目目录。
 
 ```powershell
-ssh-keygen -t rsa -b 4096 -f $env:USERPROFILE\.ssh\personal-fixed-exit-lightsail -C "personal-fixed-exit-lightsail"
-```
-
-导入 Lightsail：
-
-```powershell
-# Lightsail expects the base64 key body, not the whole authorized_keys line.
-# The .pub file should look like: ssh-rsa AAAA... personal-fixed-exit-lightsail
-$pubLine = (Get-Content "$env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pub" -Raw).Trim()
-$parts = $pubLine -split '\s+'
-if ($parts[0] -ne 'ssh-rsa') { throw "Lightsail import-key-pair expects ssh-rsa. Found: $($parts[0])" }
-$pub = $parts[1]
-
-aws lightsail import-key-pair `
+$keyBase64 = aws lightsail create-key-pair `
   --profile personal-fixed-exit `
   --region ap-northeast-1 `
   --key-pair-name personal-fixed-exit-lightsail `
-  --public-key-base64 $pub
+  --query 'privateKeyBase64' `
+  --output text
+
+$keyText = [Text.Encoding]::ASCII.GetString([Convert]::FromBase64String($keyBase64))
+$keyPath = "$env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pem"
+Set-Content -Path $keyPath -Value $keyText -NoNewline
 ```
 
 确认：
@@ -125,3 +120,14 @@ aws lightsail get-key-pairs `
 SSH_KEY_NAME=personal-fixed-exit-lightsail
 ```
 
+之后 SSH 连接使用：
+
+```powershell
+ssh -i $env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pem ubuntu@服务器IP
+```
+
+如果你已经创建过同名 key pair，`create-key-pair` 会失败。可以换一个 key pair 名称，或确认不用后删除旧 key pair。
+
+## 备用：导入本地公钥
+
+Lightsail `import-key-pair` 要求 `ssh-rsa` 类型，且 `--public-key-base64` 传入的是公钥行中间的 base64 key body。实际兼容性比 `create-key-pair` 更容易踩坑，因此只作为备用。
