@@ -39,3 +39,12 @@ sudo ss -lntp
 - Static IP：除非 IP 声誉异常或区域迁移，否则不频繁更换。
 - 区域：Tokyo 不稳定或目标服务体验差时，再切换 Singapore。
 
+
+## v2rayN / Reality 排障
+
+- `Test-NetConnection <node-ip> -Port 443` 必须显示 `TcpTestSucceeded=True`，且 `InterfaceAlias` 不应是其他代理的 TUN 网卡。
+- 如果本机需要同时保留 Hiddify 给 Codex 使用，用 `scripts/Add-NodeBypassRoute.ps1` 给节点 IP 加直连路由，不要直接关闭 Hiddify。
+- v2rayN 延迟 `-1ms` 只能说明探测失败，不等同于 AWS 端口不通；继续看本地 Xray 日志和服务端 `journalctl -u xray`。
+- 客户端日志出现 `proxy/vless/outbound ... [EOF]`，服务端日志出现 `REALITY ... handshake did not complete successfully`，通常是 Reality `serverName/dest`、public key、shortId 或客户端未重新导入导致。
+- 本项目默认 Reality `serverName/dest` 使用 `www.cloudflare.com`，客户端 URL 包含 `spx=%2F`。
+- Windows `curl.exe` 通过代理测试 HTTPS 时，如果出现 `CRYPT_E_REVOCATION_OFFLINE`，可用 `--ssl-no-revoke` 排除本机 Schannel 吊销检查干扰。

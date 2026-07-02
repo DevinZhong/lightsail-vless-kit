@@ -8,7 +8,7 @@
 | --- | --- |
 | 测试日期 | YYYY-MM-DD |
 | 测试地点/网络 | 家宽 / 公司 / 手机热点 |
-| 客户端 | Hiddify / Clash Verge Rev |
+| 客户端 | v2rayN / Hiddify / Clash Verge Rev |
 | 客户端版本 |  |
 | 服务端区域 | Tokyo / Singapore |
 | Static IP | `<redacted>` |
@@ -21,7 +21,9 @@
 | 443 端口 | 可连接 | 未测 |  |
 | 客户端 TUN | 正常启用 | 未测 |  |
 | DNS 解析 | 无明显污染 | 未测 |  |
-| 出口 IP | 显示 Lightsail Static IP | 未测 |  |
+| 出口 IP | 显示 Lightsail 节点 IP | 未测 |  |
+| v2rayN Xray 核心直测 | `Test-V2rayNCore.ps1` 成功 | 未测 |  |
+| Reality 握手 | 服务端无 handshake failed | 未测 |  |
 
 ## 常用站点测试
 

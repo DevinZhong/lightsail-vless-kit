@@ -11,7 +11,7 @@
 - 默认可用区：`ap-northeast-1a`
 - 默认系统：Ubuntu 24.04 LTS / `ubuntu_24_04`
 - 默认套餐：Linux $5/月档 / `nano_3_0`
-- 主协议：Xray-core VLESS Reality Vision TCP 443
+- 主协议：Xray-core VLESS Reality Vision TCP 443，默认 `serverName/dest` 使用 `www.cloudflare.com`
 - 备用协议：Hysteria2 UDP 443，可关闭
 - Windows 客户端：v2rayN 首选，Hiddify 备用，Clash Verge Rev 用于复杂规则/TUN 场景
 - 订阅策略：不维护远程固定订阅地址；每次重建生成本地 URL，手动导入客户端
@@ -127,6 +127,31 @@ output/subscription.txt
 ```
 
 这些文件都包含代理连接凭据，已被 `.gitignore` 忽略。
+
+不切换客户端，先检查节点连通性：
+
+```powershell
+.\scripts\Test-NodeConnectivity.ps1
+```
+
+如果 v2rayN 测延迟是 `-1ms`，优先按这个顺序排查：
+
+1. `Test-NodeConnectivity.ps1` 里 TCP 443 是否为 `OK`。
+2. SSH 登录服务器后确认 `sudo systemctl status xray --no-pager`。
+3. 查看 `sudo tail -n 200 /var/log/proxy-bootstrap.log` 是否有 cloud-init 安装失败。
+4. 如果 `cloud-init-output.log` 出现 `Illegal option -o pipefail`，说明 user-data 被 `/bin/sh` 执行；模板已主动切换到 bash，重新渲染或手动用 `sudo bash` 执行 bootstrap。
+5. 如果本机开着 Hiddify/TUN，先用 `Add-NodeBypassRoute.ps1` 给节点 IP 加直连路由，避免调试流量绕到另一个代理。
+6. 如果服务端日志出现 `REALITY: processed invalid connection ... handshake did not complete successfully`，优先确认客户端 URL 已重新导入，且 `sni` 与服务端 `serverNames` 一致。本项目默认使用 `www.cloudflare.com`。
+7. 服务端正常后，再在 v2rayN 里先用系统代理模式测试，确认可用后再开 TUN。
+
+退出 v2rayN 后，可以用测试脚本直接启动 v2rayN 自带 Xray 核心做一次本地验证：
+
+```powershell
+.\scripts\Test-V2rayNCore.ps1
+```
+
+脚本会临时复制 `C:\Program Files\v2rayN\binConfigs\config.json`，不会改 v2rayN 正式配置。Windows `curl.exe` 可能因为证书吊销检查返回 `CRYPT_E_REVOCATION_OFFLINE`，脚本已使用 `--ssl-no-revoke` 规避这个本地 Schannel 问题。
+
 ## 初始化本地配置
 
 ```bash
@@ -164,7 +189,7 @@ SSH_ALLOWED_CIDR=<your-public-ip>/32
 
 1. 渲染 `output/cloud-init.sh`。
 2. 调用 AWS CLI 创建 Lightsail 实例。
-3. 开放 TCP 443、UDP 443、SSH 22。
+3. 开放 TCP 443、可选 UDP 443、SSH 22。端口脚本使用 JSON `port-info`，避免 TCP 443 漏开。
 4. 等待公网 IP 和 SSH。
 5. 生成本地客户端文件。
 

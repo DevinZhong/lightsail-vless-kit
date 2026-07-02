@@ -19,7 +19,7 @@ fi
 require_env SERVER_IP NODE_NAME VLESS_UUID REALITY_PUBLIC_KEY REALITY_SHORT_ID REALITY_SERVER_NAME REALITY_FINGERPRINT
 
 url_encoded_name="${NODE_NAME// /%20}"
-VLESS_URL="vless://${VLESS_UUID}@${SERVER_IP}:443?encryption=none&security=reality&sni=${REALITY_SERVER_NAME}&fp=${REALITY_FINGERPRINT}&pbk=${REALITY_PUBLIC_KEY}&sid=${REALITY_SHORT_ID}&type=tcp&flow=xtls-rprx-vision#${url_encoded_name}-reality"
+VLESS_URL="vless://${VLESS_UUID}@${SERVER_IP}:443?encryption=none&security=reality&sni=${REALITY_SERVER_NAME}&fp=${REALITY_FINGERPRINT}&pbk=${REALITY_PUBLIC_KEY}&sid=${REALITY_SHORT_ID}&spx=%2F&type=tcp&flow=xtls-rprx-vision#${url_encoded_name}-reality"
 
 printf '%s\n' "$VLESS_URL" > "$OUTPUT_DIR/vless-reality-url.txt"
 

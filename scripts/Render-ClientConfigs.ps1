@@ -10,7 +10,7 @@ if (-not [string]::IsNullOrWhiteSpace($ServerIp)) { $config['SERVER_IP'] = $Serv
 Require-Config $config @('SERVER_IP', 'NODE_NAME', 'VLESS_UUID', 'REALITY_PUBLIC_KEY', 'REALITY_SHORT_ID', 'REALITY_SERVER_NAME', 'REALITY_FINGERPRINT')
 
 $nodeName = [uri]::EscapeDataString([string]$config['NODE_NAME'])
-$vlessUrl = ('vless://{0}@{1}:443?encryption=none&security=reality&sni={2}&fp={3}&pbk={4}&sid={5}&type=tcp&flow=xtls-rprx-vision#{6}-reality' -f `
+$vlessUrl = ('vless://{0}@{1}:443?encryption=none&security=reality&sni={2}&fp={3}&pbk={4}&sid={5}&spx=%2F&type=tcp&flow=xtls-rprx-vision#{6}-reality' -f `
   $config['VLESS_UUID'], $config['SERVER_IP'], $config['REALITY_SERVER_NAME'], $config['REALITY_FINGERPRINT'], $config['REALITY_PUBLIC_KEY'], $config['REALITY_SHORT_ID'], $nodeName)
 
 Save-TextFileNoBom (Join-Path $Script:OutputDir 'vless-reality-url.txt') ($vlessUrl + "`n")

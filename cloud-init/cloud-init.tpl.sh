@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+if [ -z "${BASH_VERSION:-}" ]; then
+  exec /usr/bin/env bash "$0" "$@"
+fi
 set -euo pipefail
 
 # Cloud-init bootstrap for personal fixed-exit node.
@@ -136,7 +139,10 @@ start_services() {
 
 install_base
 install_xray
-install_hysteria
+if ! install_hysteria; then
+  log "Hysteria2 install failed; continuing with Xray-only deployment."
+  HYSTERIA_ENABLED="false"
+fi
 write_configs
 configure_firewall
 start_services

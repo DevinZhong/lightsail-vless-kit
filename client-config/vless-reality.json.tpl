@@ -9,5 +9,6 @@
   "sni": "{{REALITY_SERVER_NAME}}",
   "fp": "{{REALITY_FINGERPRINT}}",
   "pbk": "{{REALITY_PUBLIC_KEY}}",
-  "sid": "{{REALITY_SHORT_ID}}"
+  "sid": "{{REALITY_SHORT_ID}}",
+  "spx": "/"
 }
