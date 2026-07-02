@@ -1,0 +1,55 @@
+param(
+  [switch]$Force
+)
+
+. "$PSScriptRoot\common.ps1"
+
+$secretsPath = Join-Path $Script:RepoRoot 'secrets.local.env'
+$existing = Read-DotEnvFile $secretsPath
+
+function Existing-OrNew {
+  param([string]$Name, [scriptblock]$Factory)
+  if (-not $Force -and $existing.ContainsKey($Name) -and -not [string]::IsNullOrWhiteSpace([string]$existing[$Name])) {
+    return [string]$existing[$Name]
+  }
+  return & $Factory
+}
+
+$xray = Get-Command xray -ErrorAction SilentlyContinue
+if (-not $xray) { $xray = Get-Command xray.exe -ErrorAction SilentlyContinue }
+if (-not $xray) {
+  Die 'xray/xray.exe is required in PATH to generate REALITY x25519 keys. Install Xray locally or generate REALITY keys elsewhere and fill secrets.local.env manually.'
+}
+
+$vlessUuid = Existing-OrNew 'VLESS_UUID' { [guid]::NewGuid().ToString() }
+
+$realityPrivate = $null
+$realityPublic = $null
+if (-not $Force -and $existing.ContainsKey('REALITY_PRIVATE_KEY') -and $existing.ContainsKey('REALITY_PUBLIC_KEY') -and
+    -not [string]::IsNullOrWhiteSpace([string]$existing['REALITY_PRIVATE_KEY']) -and
+    -not [string]::IsNullOrWhiteSpace([string]$existing['REALITY_PUBLIC_KEY'])) {
+  $realityPrivate = [string]$existing['REALITY_PRIVATE_KEY']
+  $realityPublic = [string]$existing['REALITY_PUBLIC_KEY']
+} else {
+  $keyOutput = & $xray.Source x25519
+  $privateLine = $keyOutput | Where-Object { $_ -match 'Private key:' } | Select-Object -First 1
+  $publicLine = $keyOutput | Where-Object { $_ -match 'Public key:' } | Select-Object -First 1
+  if (-not $privateLine -or -not $publicLine) { Die 'Could not parse xray x25519 output.' }
+  $realityPrivate = ($privateLine -replace '^.*Private key:\s*', '').Trim()
+  $realityPublic = ($publicLine -replace '^.*Public key:\s*', '').Trim()
+}
+
+$shortId = Existing-OrNew 'REALITY_SHORT_ID' { Get-RandomHex 8 }
+$hysteriaPassword = Existing-OrNew 'HYSTERIA_PASSWORD' { Get-RandomHex 24 }
+
+$text = @"
+# Local proxy secrets. Do not commit.
+VLESS_UUID=$vlessUuid
+REALITY_PRIVATE_KEY=$realityPrivate
+REALITY_PUBLIC_KEY=$realityPublic
+REALITY_SHORT_ID=$shortId
+HYSTERIA_PASSWORD=$hysteriaPassword
+"@
+Save-TextFileNoBom $secretsPath $text
+Write-Info "Wrote $secretsPath"
+Write-Info 'Do not commit or share this file.'

@@ -99,6 +99,34 @@ aws lightsail get-blueprints --region ap-northeast-1
 aws lightsail get-bundles --region ap-northeast-1
 ```
 
+
+## PowerShell 快速路径
+
+Windows 上推荐直接使用 PowerShell 脚本，避免 WSL/Git Bash 与 Windows AWS CLI 的 PATH 不一致。
+
+生成代理协议凭据：
+
+```powershell
+.\scripts\Generate-Secrets.ps1
+```
+
+如果本机没有 `xray.exe`，先手动安装 Xray，或在可信环境生成 Reality key 后填写 `secrets.local.env`。
+
+创建 Lightsail 节点：
+
+```powershell
+.\scripts\New-LightsailProxy.ps1
+```
+
+创建完成后，本地客户端 URL 会生成到：
+
+```text
+output/vless-reality-url.txt
+output/hysteria2-url.txt
+output/subscription.txt
+```
+
+这些文件都包含代理连接凭据，已被 `.gitignore` 忽略。
 ## 初始化本地配置
 
 ```bash
@@ -192,4 +220,5 @@ sudo ss -lntup
 - 默认不使用 Static IP，因为“IP 不行就快速重建”的模式更适合新 IP。
 - 不维护远程固定订阅地址，重建频率低时手动导入本地 URL 更简单。
 - Hysteria2 是备用协议，UDP 网络不稳定时可在 `.env.local` 设置 `HYSTERIA_ENABLED=false`。
+
 
