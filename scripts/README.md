@@ -18,6 +18,13 @@
 ./scripts/delete-lightsail.sh --yes
 ```
 
+Windows v2rayN 推荐路由和 TUN 设置：
+
+```powershell
+.\scripts\Set-V2rayNRecommendedRouting.ps1
+.\scripts\Set-V2rayNRecommendedRouting.ps1 -Apply
+```
+
 ## 安全边界
 
 不要在脚本中保存：

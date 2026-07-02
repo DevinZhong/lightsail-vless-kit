@@ -7,6 +7,17 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+function Set-Utf8NoBomContent {
+  param(
+    [Parameter(Mandatory = $true)][string]$LiteralPath,
+    [Parameter(Mandatory = $true)][string]$Value
+  )
+
+  $encoding = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($LiteralPath, $Value, $encoding)
+}
+
+
 $xray = Join-Path $V2rayNDir 'bin\xray\xray.exe'
 $assetDir = Join-Path $V2rayNDir 'bin'
 $config = Join-Path $V2rayNDir 'binConfigs\config.json'
@@ -23,7 +34,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $assetDir 'geosite.dat'))) { throw "
 $cfg = Get-Content -LiteralPath $config -Raw | ConvertFrom-Json
 if (-not $cfg.log) { $cfg | Add-Member -MemberType NoteProperty -Name log -Value ([pscustomobject]@{}) }
 $cfg.log.loglevel = 'debug'
-$cfg | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $testConfig -Encoding utf8NoBOM
+Set-Utf8NoBomContent -LiteralPath $testConfig -Value ($cfg | ConvertTo-Json -Depth 100)
 
 $env:XRAY_LOCATION_ASSET = $assetDir
 Write-Host "[INFO] Using Xray asset dir: $assetDir"

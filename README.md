@@ -152,6 +152,13 @@ output/subscription.txt
 
 脚本会临时复制 `C:\Program Files\v2rayN\binConfigs\config.json`，不会改 v2rayN 正式配置。Windows `curl.exe` 可能因为证书吊销检查返回 `CRYPT_E_REVOCATION_OFFLINE`，脚本已使用 `--ssl-no-revoke` 规避这个本地 Schannel 问题。
 
+v2rayN 的日常路由、TUN、Xray/sing-box 选择和推荐规则见 docs/v2rayn-routing.md。关闭 v2rayN 后，可以应用推荐客户端设置：
+
+```powershell
+.\scripts\Set-V2rayNRecommendedRouting.ps1 -Apply
+```
+
+
 ## 初始化本地配置
 
 ```bash
@@ -245,5 +252,3 @@ sudo ss -lntup
 - 默认不使用 Static IP，因为“IP 不行就快速重建”的模式更适合新 IP。
 - 不维护远程固定订阅地址，重建频率低时手动导入本地 URL 更简单。
 - Hysteria2 是备用协议，UDP 网络不稳定时可在 `.env.local` 设置 `HYSTERIA_ENABLED=false`。
-
-
