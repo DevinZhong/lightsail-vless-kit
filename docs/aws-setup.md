@@ -97,11 +97,12 @@ ssh-keygen -t rsa -b 4096 -f $env:USERPROFILE\.ssh\personal-fixed-exit-lightsail
 导入 Lightsail：
 
 ```powershell
-$pub = [Convert]::ToBase64String(
-  [Text.Encoding]::ASCII.GetBytes(
-    (Get-Content "$env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pub" -Raw).Trim()
-  )
-)
+# Lightsail expects the base64 key body, not the whole authorized_keys line.
+# The .pub file should look like: ssh-rsa AAAA... personal-fixed-exit-lightsail
+$pubLine = (Get-Content "$env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pub" -Raw).Trim()
+$parts = $pubLine -split '\s+'
+if ($parts[0] -ne 'ssh-rsa') { throw "Lightsail import-key-pair expects ssh-rsa. Found: $($parts[0])" }
+$pub = $parts[1]
 
 aws lightsail import-key-pair `
   --profile personal-fixed-exit `
@@ -123,3 +124,4 @@ aws lightsail get-key-pairs `
 ```bash
 SSH_KEY_NAME=personal-fixed-exit-lightsail
 ```
+
