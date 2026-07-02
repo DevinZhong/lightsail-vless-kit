@@ -101,9 +101,10 @@ $keyBase64 = aws lightsail create-key-pair `
   --query 'privateKeyBase64' `
   --output text
 
-$keyText = [Text.Encoding]::ASCII.GetString([Convert]::FromBase64String($keyBase64))
+# AWS CLI returns a PEM private key text here, despite the field name privateKeyBase64.
+# Save it as-is. Do not base64-decode it.
 $keyPath = "$env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pem"
-Set-Content -Path $keyPath -Value $keyText -NoNewline
+Set-Content -Path $keyPath -Value $keyBase64 -NoNewline
 ```
 
 确认：
@@ -131,3 +132,4 @@ ssh -i $env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pem ubuntu@服务器I
 ## 备用：导入本地公钥
 
 Lightsail `import-key-pair` 要求 `ssh-rsa` 类型，且 `--public-key-base64` 传入的是公钥行中间的 base64 key body。实际兼容性比 `create-key-pair` 更容易踩坑，因此只作为备用。
+
