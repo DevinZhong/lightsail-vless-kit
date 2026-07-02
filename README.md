@@ -70,6 +70,10 @@
 └── templates/
 ```
 
+## AWS 设置
+
+IAM 用户、权限策略和 SSH key pair 导入步骤见：docs/aws-setup.md。
+
 ## 前置条件
 
 先由你完成：
@@ -188,3 +192,4 @@ sudo ss -lntup
 - 默认不使用 Static IP，因为“IP 不行就快速重建”的模式更适合新 IP。
 - 不维护远程固定订阅地址，重建频率低时手动导入本地 URL 更简单。
 - Hysteria2 是备用协议，UDP 网络不稳定时可在 `.env.local` 设置 `HYSTERIA_ENABLED=false`。
+
