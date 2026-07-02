@@ -31,12 +31,16 @@ if (-not $Force -and $existing.ContainsKey('REALITY_PRIVATE_KEY') -and $existing
   $realityPrivate = [string]$existing['REALITY_PRIVATE_KEY']
   $realityPublic = [string]$existing['REALITY_PUBLIC_KEY']
 } else {
-  $keyOutput = & $xray.Source x25519
-  $privateLine = $keyOutput | Where-Object { $_ -match 'Private key:' } | Select-Object -First 1
-  $publicLine = $keyOutput | Where-Object { $_ -match 'Public key:' } | Select-Object -First 1
-  if (-not $privateLine -or -not $publicLine) { Die 'Could not parse xray x25519 output.' }
-  $realityPrivate = ($privateLine -replace '^.*Private key:\s*', '').Trim()
-  $realityPublic = ($publicLine -replace '^.*Public key:\s*', '').Trim()
+  $rawKeyOutput = (& $xray.Source x25519 2>&1 | Out-String).Trim()
+  $privateMatch = [regex]::Match($rawKeyOutput, '(?im)^\s*Private\s*Key\s*:\s*(\S+)\s*$')
+  $publicMatch = [regex]::Match($rawKeyOutput, '(?im)^\s*Public\s*Key\s*:\s*(\S+)\s*$')
+
+  if (-not $privateMatch.Success -or -not $publicMatch.Success) {
+    Die 'Could not parse xray x25519 output. Run `xray x25519` manually and fill REALITY_PRIVATE_KEY / REALITY_PUBLIC_KEY in secrets.local.env.'
+  }
+
+  $realityPrivate = $privateMatch.Groups[1].Value.Trim()
+  $realityPublic = $publicMatch.Groups[1].Value.Trim()
 }
 
 $shortId = Existing-OrNew 'REALITY_SHORT_ID' { Get-RandomHex 8 }
@@ -53,3 +57,4 @@ HYSTERIA_PASSWORD=$hysteriaPassword
 Save-TextFileNoBom $secretsPath $text
 Write-Info "Wrote $secretsPath"
 Write-Info 'Do not commit or share this file.'
+
