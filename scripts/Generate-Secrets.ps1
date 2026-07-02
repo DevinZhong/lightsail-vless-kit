@@ -32,8 +32,11 @@ if (-not $Force -and $existing.ContainsKey('REALITY_PRIVATE_KEY') -and $existing
   $realityPublic = [string]$existing['REALITY_PUBLIC_KEY']
 } else {
   $rawKeyOutput = (& $xray.Source x25519 2>&1 | Out-String).Trim()
+
+  # Xray releases have used both "Private key/Public key" and
+  # "PrivateKey/Password (PublicKey)" labels. Accept both.
   $privateMatch = [regex]::Match($rawKeyOutput, '(?im)^\s*Private\s*Key\s*:\s*(\S+)\s*$')
-  $publicMatch = [regex]::Match($rawKeyOutput, '(?im)^\s*Public\s*Key\s*:\s*(\S+)\s*$')
+  $publicMatch = [regex]::Match($rawKeyOutput, '(?im)^\s*(?:Public\s*Key|Password\s*\(\s*PublicKey\s*\))\s*:\s*(\S+)\s*$')
 
   if (-not $privateMatch.Success -or -not $publicMatch.Success) {
     Die 'Could not parse xray x25519 output. Run `xray x25519` manually and fill REALITY_PRIVATE_KEY / REALITY_PUBLIC_KEY in secrets.local.env.'
@@ -57,4 +60,3 @@ HYSTERIA_PASSWORD=$hysteriaPassword
 Save-TextFileNoBom $secretsPath $text
 Write-Info "Wrote $secretsPath"
 Write-Info 'Do not commit or share this file.'
-
