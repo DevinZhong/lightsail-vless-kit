@@ -90,14 +90,14 @@ v2rayN 使用的 `geosite.dat` 规则来自社区维护的 domain-list 数据，
 
 - 自动发现 `C:\Program Files\v2rayN` 和 `%LOCALAPPDATA%\v2rayN`。
 - 备份 `guiNDB.db` 和 `guiNConfig.json`。
-- 把 `54.250.156.10` 节点的 Reality SNI 修正为 `www.cloudflare.com`。
+- 如果传入 `-ProfileAddress`，把匹配节点的 Reality SNI 修正为 `www.cloudflare.com`。
 - 在当前活动路由前部插入 OpenAI / Claude / Google / GitHub / npm / PyPI 强制代理规则。
 - 启用基础 TUN 开关：`EnableTun=true`、`AutoRoute=true`、`StrictRoute=true`、`EnableIPv6Address=false`。
 
 如果节点 IP 变化，可以传参：
 
 ```powershell
-.\scripts\Set-V2rayNRecommendedRouting.ps1 -ProfileAddress '<new-ip>' -RealityServerName 'www.cloudflare.com' -Apply
+.\scripts\Set-V2rayNRecommendedRouting.ps1 -ProfileAddress '<server-ip>' -RealityServerName 'www.cloudflare.com' -Apply
 ```
 
 应用后重启 v2rayN，并在界面确认：

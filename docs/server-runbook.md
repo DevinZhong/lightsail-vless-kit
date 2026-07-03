@@ -1,6 +1,7 @@
 # 服务端部署手册
 
 > 本手册只保存脱敏部署步骤。不要写入 AWS 凭证、SSH 私钥、VLESS UUID、Reality private key、short id、订阅链接或完整节点 URI。
+> 状态：人工部署参考。当前推荐的脚本化初次部署入口见 [quickstart.md](quickstart.md)。
 
 ## 目标方案
 

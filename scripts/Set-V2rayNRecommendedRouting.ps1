@@ -3,7 +3,7 @@ param(
     'C:\Program Files\v2rayN',
     "$env:LOCALAPPDATA\v2rayN"
   ),
-  [string]$ProfileAddress = '54.250.156.10',
+  [string]$ProfileAddress = '',
   [string]$RealityServerName = 'www.cloudflare.com',
   [switch]$Apply
 )
@@ -46,6 +46,11 @@ function Get-ExistingConfigDirs {
 $targets = @(Get-ExistingConfigDirs)
 if ($targets.Count -eq 0) {
   throw 'No v2rayN guiConfigs directory found. Pass -V2rayNDirs with the v2rayN install or user-data path.'
+}
+
+if ([string]::IsNullOrWhiteSpace($ProfileAddress)) {
+  Write-Host '[WARN] -ProfileAddress is empty. The script will only manage routing/TUN settings and will not update any node SNI.'
+  Write-Host '[WARN] Pass -ProfileAddress <node-ip-or-host> to update matching v2rayN profiles.'
 }
 
 Write-Host "[INFO] Found $($targets.Count) v2rayN config directory/directories."
@@ -180,13 +185,13 @@ def update_db(path):
         profile_rows = cur.execute(
             "select IndexId, Remarks, Address, Port, Sni, CoreType from ProfileItem order by Remarks"
         ).fetchall()
-        matches = [r for r in profile_rows if str(r[2]) == profile_address]
+        matches = [r for r in profile_rows if profile_address and str(r[2]) == profile_address]
         active = cur.execute(
             "select Id, Remarks, RuleSet, RuleNum from RoutingItem where IsActive = 1 limit 1"
         ).fetchone()
 
         changes = []
-        if matches:
+        if profile_address and matches:
             for row in matches:
                 if row[4] != reality_server_name:
                     changes.append(f"ProfileItem {row[1]} Sni: {row[4]} -> {reality_server_name}")
@@ -195,6 +200,8 @@ def update_db(path):
                     "update ProfileItem set Sni = ? where Address = ?",
                     (reality_server_name, profile_address),
                 )
+        elif not profile_address:
+            changes.append("Profile SNI update skipped because ProfileAddress is empty")
         else:
             changes.append(f"No ProfileItem matched Address={profile_address}")
 

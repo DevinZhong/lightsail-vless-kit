@@ -1,6 +1,7 @@
 # 快速重建方案
 
 > 用于 AWS 节点不可用、IP 声誉异常、区域迁移或服务端损坏时快速恢复。不要在脚本或文档中保存 AWS access key、secret key、SSH 私钥、VLESS UUID、Reality private key、short id、订阅链接或完整节点 URI。
+> 状态：历史规划稿。当前实际操作入口见 [rebuild-and-delete.md](rebuild-and-delete.md)。本文保留用于理解设计取舍，不再作为主操作手册。
 
 ## 核心逻辑
 
@@ -13,7 +14,9 @@
 3. 设置 Lightsail 防火墙端口。
 4. 等待 SSH 可连接。
 5. 执行基础系统初始化。
-6. 安装 Xray-core。`r`n7. 生成本地客户端 URL 和本地订阅文本。`r`n8. 输出下一步人工操作清单。
+6. 安装 Xray-core。
+7. 生成本地客户端 URL 和本地订阅文本。
+8. 输出下一步人工操作清单。
 
 脚本不负责保存或提交敏感内容：
 

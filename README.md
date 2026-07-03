@@ -2,23 +2,22 @@
 
 低成本、低维护、可重复重建的个人固定外网出口环境项目。
 
-目标是用本地脚本快速创建 AWS Lightsail 东京 Ubuntu 节点，通过 cloud-init 自动部署 Xray-core VLESS Reality TCP 443，并可选部署 Hysteria2 UDP 443 作为备用。Windows 客户端首选 v2rayN，重建后手动导入本地生成的节点 URL。
+目标是用本地脚本快速创建 AWS Lightsail Ubuntu 节点，通过 cloud-init 自动部署 Xray-core VLESS Reality TCP 443，并可选部署 Hysteria2 UDP 443 作为备用。Windows 客户端首选 v2rayN，重建后手动导入本地生成的节点 URL。
 
-## 目标架构
+## 当前定位
 
 - 云厂商：AWS Lightsail Global
 - 默认区域：Tokyo / `ap-northeast-1`
-- 默认可用区：`ap-northeast-1a`
 - 默认系统：Ubuntu 24.04 LTS / `ubuntu_24_04`
 - 默认套餐：Linux $5/月档 / `nano_3_0`
-- 主协议：Xray-core VLESS Reality Vision TCP 443，默认 `serverName/dest` 使用 `www.cloudflare.com`
+- 主协议：Xray-core VLESS Reality Vision TCP 443
 - 备用协议：Hysteria2 UDP 443，可关闭
-- Windows 客户端：v2rayN 首选，Hiddify 备用，Clash Verge Rev 用于复杂规则/TUN 场景
+- 客户端：Windows v2rayN 首选
 - 订阅策略：不维护远程固定订阅地址；每次重建生成本地 URL，手动导入客户端
 
-## 绝对不要保存的内容
+## 安全边界
 
-不要把以下任何内容写入 git、贴到 issue 或同步到不可信云盘：
+绝对不要把以下内容提交到 git、贴到 issue 或同步到不可信云盘：
 
 - AWS access key、AWS secret key、AWS session token
 - SSH 私钥、服务器登录密码
@@ -33,89 +32,20 @@
 - AWS 凭证走本机 AWS CLI 登录态，不进入项目文件。
 - SSH 私钥留在本机 `~/.ssh`、ssh-agent 或 AWS Lightsail key pair，不进入项目文件。
 - 代理协议凭据放 `secrets.local.env`，该文件被 `.gitignore` 忽略。
+- 渲染出的客户端文件放 `output/`，该目录内容被 `.gitignore` 忽略。
 
-## 目录结构
+## 快速开始
 
-```text
-.
-├── README.md
-├── .env.example
-├── secrets.example.env
-├── cloud-init/
-│   └── cloud-init.tpl.sh
-├── client-config/
-│   ├── hysteria2-url.tpl
-│   ├── hysteria2.yaml.tpl
-│   ├── vless-reality-url.tpl
-│   └── vless-reality.json.tpl
-├── docs/
-├── output/
-│   └── .gitkeep
-├── scripts/
-│   ├── common.sh
-│   ├── create-lightsail.sh
-│   ├── delete-lightsail.sh
-│   ├── generate-secrets.sh
-│   ├── get-instance-ip.sh
-│   ├── open-ports.sh
-│   ├── rebuild-proxy.sh
-│   ├── render-client-configs.sh
-│   ├── render-cloud-init.sh
-│   └── wait-ssh.sh
-├── server-config/
-│   ├── hysteria-config.tpl.yaml
-│   ├── hysteria-server.service
-│   ├── xray-config.tpl.json
-│   └── xray.service
-└── templates/
-```
+初次部署按 [docs/quickstart.md](docs/quickstart.md) 走。
 
-## AWS 设置
-
-IAM 用户、权限策略和 SSH key pair 导入步骤见：docs/aws-setup.md。
-
-## 前置条件
-
-先由你完成：
-
-1. 注册 AWS 账号。
-2. 开启 AWS root 账号 MFA。
-3. 配置预算提醒，例如 `$5`、`$10`。
-4. 安装 AWS CLI v2。
-5. 完成本机 AWS CLI 登录。
-6. 准备 Lightsail key pair 或本机 SSH 公钥方案。
-
-确认 AWS CLI：
+Windows PowerShell 主路径：
 
 ```powershell
-aws --version
-aws sts get-caller-identity
-```
-
-查询 Lightsail 可用 blueprint / bundle：
-
-```bash
-aws lightsail get-blueprints --region ap-northeast-1
-aws lightsail get-bundles --region ap-northeast-1
-```
-
-
-## PowerShell 快速路径
-
-Windows 上推荐直接使用 PowerShell 脚本，避免 WSL/Git Bash 与 Windows AWS CLI 的 PATH 不一致。
-
-生成代理协议凭据：
-
-```powershell
+Copy-Item .env.example .env.local
+Copy-Item secrets.example.env secrets.local.env
 .\scripts\Generate-Secrets.ps1
-```
-
-如果本机没有 `xray.exe`，先手动安装 Xray，或在可信环境生成 Reality key 后填写 `secrets.local.env`。
-
-创建 Lightsail 节点：
-
-```powershell
 .\scripts\New-LightsailProxy.ps1
+.\scripts\Test-NodeConnectivity.ps1
 ```
 
 创建完成后，本地客户端 URL 会生成到：
@@ -126,124 +56,61 @@ output/hysteria2-url.txt
 output/subscription.txt
 ```
 
-这些文件都包含代理连接凭据，已被 `.gitignore` 忽略。
+这些文件都包含代理连接凭据，只能本机使用。
 
-不切换客户端，先检查节点连通性：
+## 重建和删除
 
-```powershell
-.\scripts\Test-NodeConnectivity.ps1
-```
+节点不可用、IP 声誉异常或想换区域时，见 [docs/rebuild-and-delete.md](docs/rebuild-and-delete.md)。
 
-如果 v2rayN 测延迟是 `-1ms`，优先按这个顺序排查：
-
-1. `Test-NodeConnectivity.ps1` 里 TCP 443 是否为 `OK`。
-2. SSH 登录服务器后确认 `sudo systemctl status xray --no-pager`。
-3. 查看 `sudo tail -n 200 /var/log/proxy-bootstrap.log` 是否有 cloud-init 安装失败。
-4. 如果 `cloud-init-output.log` 出现 `Illegal option -o pipefail`，说明 user-data 被 `/bin/sh` 执行；模板已主动切换到 bash，重新渲染或手动用 `sudo bash` 执行 bootstrap。
-5. 如果本机开着 Hiddify/TUN，先用 `Add-NodeBypassRoute.ps1` 给节点 IP 加直连路由，避免调试流量绕到另一个代理。
-6. 如果服务端日志出现 `REALITY: processed invalid connection ... handshake did not complete successfully`，优先确认客户端 URL 已重新导入，且 `sni` 与服务端 `serverNames` 一致。本项目默认使用 `www.cloudflare.com`。
-7. 服务端正常后，再在 v2rayN 里先用系统代理模式测试，确认可用后再开 TUN。
-
-退出 v2rayN 后，可以用测试脚本直接启动 v2rayN 自带 Xray 核心做一次本地验证：
+常用命令：
 
 ```powershell
-.\scripts\Test-V2rayNCore.ps1
+.\scripts\Rebuild-LightsailProxy.ps1
+.\scripts\Remove-LightsailProxy.ps1
 ```
 
-脚本会临时复制 `C:\Program Files\v2rayN\binConfigs\config.json`，不会改 v2rayN 正式配置。Windows `curl.exe` 可能因为证书吊销检查返回 `CRYPT_E_REVOCATION_OFFLINE`，脚本已使用 `--ssl-no-revoke` 规避这个本地 Schannel 问题。
+重建后 IP 和客户端 URL 会变化，需要重新导入 v2rayN。
 
-v2rayN 的日常路由、TUN、Xray/sing-box 选择和推荐规则见 docs/v2rayn-routing.md。关闭 v2rayN 后，可以应用推荐客户端设置：
+## 文档索引
 
-```powershell
-.\scripts\Set-V2rayNRecommendedRouting.ps1 -Apply
-```
+| 文档 | 用途 |
+| --- | --- |
+| [docs/quickstart.md](docs/quickstart.md) | 初次部署主流程 |
+| [docs/rebuild-and-delete.md](docs/rebuild-and-delete.md) | 重建、删除、旧实例处理 |
+| [docs/aws-setup.md](docs/aws-setup.md) | IAM、AWS CLI profile、Lightsail key pair |
+| [docs/v2rayn-routing.md](docs/v2rayn-routing.md) | v2rayN 路由、TUN 和客户端辅助脚本 |
+| [docs/maintenance.md](docs/maintenance.md) | 日常维护和排障顺序 |
+| [docs/deployment-record.md](docs/deployment-record.md) | 脱敏部署记录模板 |
+| [docs/client-config-template.md](docs/client-config-template.md) | 客户端配置记录模板 |
+| [docs/test-record-template.md](docs/test-record-template.md) | 测试记录模板 |
+| [docs/open-source-review.md](docs/open-source-review.md) | 开源复用价值和开源前检查 |
 
+历史参考：
 
-## 初始化本地配置
+- [docs/server-runbook.md](docs/server-runbook.md)：人工部署手册，脚本化部署后不再作为主入口。
+- [docs/rebuild-plan.md](docs/rebuild-plan.md)：早期重建规划，当前操作以 `rebuild-and-delete.md` 为准。
 
-```bash
-cp .env.example .env.local
-cp secrets.example.env secrets.local.env
-```
+## 脚本索引
 
-编辑 `.env.local`：
+脚本说明见 [scripts/README.md](scripts/README.md)。
 
-```bash
-AWS_REGION=ap-northeast-1
-AWS_AZ=ap-northeast-1a
-LIGHTSAIL_INSTANCE_NAME=proxy-tokyo-01
-LIGHTSAIL_BUNDLE_ID=nano_3_0
-LIGHTSAIL_BLUEPRINT_ID=ubuntu_24_04
-SSH_KEY_NAME=<your-lightsail-key-pair-name>
-SSH_ALLOWED_CIDR=<your-public-ip>/32
-```
-
-生成代理协议凭据：
-
-```bash
-./scripts/generate-secrets.sh
-```
-
-注意：`generate-secrets.sh` 需要本地 `xray` 命令来生成 Reality x25519 key pair。没有本地 Xray 时，可以之后在可信机器上运行 `xray x25519` 并手动填入 `secrets.local.env`。
-
-## 创建节点
-
-```bash
-./scripts/create-lightsail.sh
-```
-
-脚本会：
-
-1. 渲染 `output/cloud-init.sh`。
-2. 调用 AWS CLI 创建 Lightsail 实例。
-3. 开放 TCP 443、可选 UDP 443、SSH 22。端口脚本使用 JSON `port-info`，避免 TCP 443 漏开。
-4. 等待公网 IP 和 SSH。
-5. 生成本地客户端文件。
-
-输出文件：
+核心 PowerShell 入口：
 
 ```text
-output/vless-reality-url.txt
-output/hysteria2-url.txt
-output/subscription.txt
-output/subscription.base64.txt
+scripts/Generate-Secrets.ps1
+scripts/New-LightsailProxy.ps1
+scripts/Rebuild-LightsailProxy.ps1
+scripts/Remove-LightsailProxy.ps1
+scripts/Test-NodeConnectivity.ps1
 ```
 
-这些文件都包含代理连接凭据，已被 `.gitignore` 忽略。
+Bash 脚本保留给 Linux/macOS/WSL：
 
-## 重建节点
-
-如果节点 IP 不可用，重建：
-
-```bash
-./scripts/rebuild-proxy.sh
-```
-
-默认 `REBUILD_DELETE_OLD=false`，如果同名实例还存在，创建会失败。确认要自动删旧实例时，在 `.env.local` 里设置：
-
-```bash
-REBUILD_DELETE_OLD=true
-```
-
-## 删除节点
-
-```bash
-./scripts/delete-lightsail.sh --yes
-```
-
-提醒：Lightsail `stop` 不等于完全停止计费；不用时应删除实例。Static IP 默认不启用，也默认不释放，避免误删。
-
-## 服务器排查
-
-SSH 登录后：
-
-```bash
-sudo systemctl status xray
-sudo journalctl -u xray -e
-sudo systemctl status hysteria-server
-sudo journalctl -u hysteria-server -e
-sudo tail -n 200 /var/log/proxy-bootstrap.log
-sudo ss -lntup
+```text
+scripts/generate-secrets.sh
+scripts/create-lightsail.sh
+scripts/rebuild-proxy.sh
+scripts/delete-lightsail.sh
 ```
 
 ## 设计取舍
@@ -252,3 +119,9 @@ sudo ss -lntup
 - 默认不使用 Static IP，因为“IP 不行就快速重建”的模式更适合新 IP。
 - 不维护远程固定订阅地址，重建频率低时手动导入本地 URL 更简单。
 - Hysteria2 是备用协议，UDP 网络不稳定时可在 `.env.local` 设置 `HYSTERIA_ENABLED=false`。
+
+## 开源复用判断
+
+这个项目有开源复用价值，适合定位为“个人固定出口节点的可审计脚本模板”。它不适合包装成大众一键面板，也不适合多用户售卖场景。
+
+开源前建议先补 `LICENSE`、安全免责声明，并确认没有真实 `.env.local`、`secrets.local.env`、`output/`、v2rayN 数据库备份或完整节点 URI 被提交。详细评估见 [docs/open-source-review.md](docs/open-source-review.md)。
