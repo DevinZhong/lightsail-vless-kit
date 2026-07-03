@@ -2,10 +2,10 @@ param(
   [string]$ServerIp
 )
 
-. "$PSScriptRoot\common.ps1"
+. "$PSScriptRoot\internal\common.ps1"
 
 if ([string]::IsNullOrWhiteSpace($ServerIp)) {
-  $ServerIp = (& "$PSScriptRoot\Get-InstanceIp.ps1").Trim()
+  $ServerIp = (& "$PSScriptRoot\internal\Get-InstanceIp.ps1").Trim()
 }
 if ([string]::IsNullOrWhiteSpace($ServerIp)) { Die 'Server IP is empty.' }
 

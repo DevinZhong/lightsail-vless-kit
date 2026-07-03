@@ -1,4 +1,4 @@
-. "$PSScriptRoot\common.ps1"
+. "$PSScriptRoot\internal\common.ps1"
 
 $config = Get-LocalConfig
 Require-Config $config @('LIGHTSAIL_INSTANCE_NAME')

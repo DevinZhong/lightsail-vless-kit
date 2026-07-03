@@ -12,7 +12,7 @@ fi
 
 if [[ -z "${SERVER_IP:-}" ]]; then
   if [[ -n "${LIGHTSAIL_INSTANCE_NAME:-}" && -n "${AWS_REGION:-}" ]] && command -v aws >/dev/null 2>&1; then
-    SERVER_IP="$("$ROOT_DIR/scripts/get-instance-ip.sh" 2>/dev/null || true)"
+    SERVER_IP="$("$ROOT_DIR/scripts/internal/get-instance-ip.sh" 2>/dev/null || true)"
   fi
 fi
 

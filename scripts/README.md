@@ -9,19 +9,39 @@
 
 这两个文件都被 `.gitignore` 忽略。
 
-## 主要入口
+## 用户直接运行
 
 Windows / PowerShell 是当前主维护路径：
 
 ```powershell
 .\scripts\Generate-Secrets.ps1
 .\scripts\New-LightsailProxy.ps1
+.\scripts\Test-NodeConnectivity.ps1
 .\scripts\Rebuild-LightsailProxy.ps1
 .\scripts\Remove-LightsailProxy.ps1
-.\scripts\Test-NodeConnectivity.ps1
 ```
 
-Bash 脚本保留给 Linux/macOS/WSL：
+这些是主流程入口：
+
+| 脚本 | 作用 |
+| --- | --- |
+| `Generate-Secrets.ps1` | 生成或补齐本地代理协议密钥 |
+| `New-LightsailProxy.ps1` | 创建 Lightsail 实例并生成客户端导入文件 |
+| `Test-NodeConnectivity.ps1` | 检查实例状态、IP、TCP 22/443 可达性 |
+| `Rebuild-LightsailProxy.ps1` | 删除当前实例并用同一份本地配置重建 |
+| `Remove-LightsailProxy.ps1` | 删除当前 Lightsail 实例 |
+
+可选的本机/客户端辅助脚本：
+
+| 脚本 | 作用 |
+| --- | --- |
+| `Set-V2rayNRecommendedRouting.ps1` | 修改 v2rayN 推荐路由和基础 TUN 设置 |
+| `Test-V2rayNCore.ps1` | 退出 v2rayN 后，用 v2rayN 自带 Xray core 做本地直测 |
+| `Add-NodeBypassRoute.ps1` | 给当前节点 IP 加直连路由，避免调试流量绕进其他代理/TUN |
+| `Remove-NodeBypassRoute.ps1` | 移除上面的直连路由 |
+| `Repair-LightsailPem.ps1` | 修复本地 Lightsail PEM 私钥换行格式 |
+
+Bash 兼容入口保留给 Linux/macOS/WSL：
 
 ```bash
 ./scripts/generate-secrets.sh
@@ -30,18 +50,16 @@ Bash 脚本保留给 Linux/macOS/WSL：
 ./scripts/delete-lightsail.sh --yes
 ```
 
-## 脚本分组
+## 内部脚本
+
+`scripts/internal/` 里的脚本由上面的入口调用，普通使用时不用手动运行：
 
 | 类型 | 脚本 | 说明 |
 | --- | --- | --- |
-| 部署入口 | `New-LightsailProxy.ps1`, `create-lightsail.sh` | 创建实例、开放端口、渲染客户端配置 |
-| 重建/删除 | `Rebuild-LightsailProxy.ps1`, `Remove-LightsailProxy.ps1`, `rebuild-proxy.sh`, `delete-lightsail.sh` | 删除旧实例并重建，或只删除实例 |
-| 渲染 | `Render-CloudInit.ps1`, `Render-ClientConfigs.ps1`, `render-cloud-init.sh`, `render-client-configs.sh` | 从模板生成本地输出 |
-| 检查 | `Test-NodeConnectivity.ps1`, `Test-V2rayNCore.ps1`, `Wait-Ssh.ps1`, `wait-ssh.sh` | 排查云侧、端口、SSH、本地 v2rayN core |
-| 客户端辅助 | `Set-V2rayNRecommendedRouting.ps1`, `Add-NodeBypassRoute.ps1`, `Remove-NodeBypassRoute.ps1` | 管理 v2rayN 推荐路由和本机临时直连路由 |
-| 公共库 | `common.ps1`, `common.sh` | 公共函数，不直接运行 |
-
-目前没有确认可以直接删除的临时调试脚本。测试和客户端辅助脚本虽然带排障属性，但属于可复用工具。
+| 公共库 | `common.ps1`, `common.sh` | 读取本地配置、公共输出、模板替换、AWS CLI 包装 |
+| 渲染 | `Render-CloudInit.ps1`, `Render-ClientConfigs.ps1`, `render-cloud-init.sh`, `render-client-configs.sh` | 从模板生成 cloud-init 和客户端文件 |
+| 云侧 helper | `Open-Ports.ps1`, `Get-InstanceIp.ps1`, `open-ports.sh`, `get-instance-ip.sh` | 开放 Lightsail 端口、查询实例公网 IP |
+| 等待/检查 helper | `Wait-Ssh.ps1`, `wait-ssh.sh` | 等待 SSH 端口可用 |
 
 ## v2rayN 推荐路由和 TUN 设置
 

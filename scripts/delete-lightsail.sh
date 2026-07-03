@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/internal/common.sh"
 
 yes=false
 if [[ "${1:-}" == "--yes" || "${1:-}" == "-y" ]]; then

@@ -1,4 +1,4 @@
-. "$PSScriptRoot\common.ps1"
+. "$PSScriptRoot\internal\common.ps1"
 
 $config = Get-LocalConfig
 Require-Config $config @('AWS_REGION', 'AWS_AZ', 'LIGHTSAIL_INSTANCE_NAME', 'LIGHTSAIL_BUNDLE_ID', 'LIGHTSAIL_BLUEPRINT_ID')
@@ -14,7 +14,7 @@ if ($existing -eq [string]$config['LIGHTSAIL_INSTANCE_NAME']) {
   Die "Lightsail instance already exists: $($config['LIGHTSAIL_INSTANCE_NAME']). Delete it first or choose another name."
 }
 
-& "$PSScriptRoot\Render-CloudInit.ps1"
+& "$PSScriptRoot\internal\Render-CloudInit.ps1"
 $cloudInitPath = Join-Path $Script:OutputDir 'cloud-init.sh'
 
 $args = @(
@@ -33,20 +33,20 @@ if ($config.ContainsKey('SSH_KEY_NAME') -and -not [string]::IsNullOrWhiteSpace([
 Write-Info "Creating Lightsail instance $($config['LIGHTSAIL_INSTANCE_NAME']) in $($config['AWS_AZ'])..."
 Invoke-Aws $config @args | Out-Null
 
-& "$PSScriptRoot\Open-Ports.ps1"
+& "$PSScriptRoot\internal\Open-Ports.ps1"
 
 Write-Info 'Waiting for instance to expose a public IP...'
 $serverIp = $null
 for ($i = 0; $i -lt 60; $i++) {
-  try { $serverIp = (& "$PSScriptRoot\Get-InstanceIp.ps1").Trim() } catch { $serverIp = $null }
+  try { $serverIp = (& "$PSScriptRoot\internal\Get-InstanceIp.ps1").Trim() } catch { $serverIp = $null }
   if (-not [string]::IsNullOrWhiteSpace($serverIp)) { break }
   Start-Sleep -Seconds 5
 }
 if ([string]::IsNullOrWhiteSpace($serverIp)) { Die 'Instance did not get a public IP in time.' }
 
-try { & "$PSScriptRoot\Wait-Ssh.ps1" -HostName $serverIp -Port 22 -TimeoutSeconds 300 } catch { Write-Warn 'SSH was not reachable yet. cloud-init may still be running.' }
+try { & "$PSScriptRoot\internal\Wait-Ssh.ps1" -HostName $serverIp -Port 22 -TimeoutSeconds 300 } catch { Write-Warn 'SSH was not reachable yet. cloud-init may still be running.' }
 
-& "$PSScriptRoot\Render-ClientConfigs.ps1" -ServerIp $serverIp
+& "$PSScriptRoot\internal\Render-ClientConfigs.ps1" -ServerIp $serverIp
 
 Write-Host ''
 Write-Host 'Instance created.'

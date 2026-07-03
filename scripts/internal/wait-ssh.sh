@@ -6,7 +6,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 load_env
 host="${1:-}"
 if [[ -z "$host" ]]; then
-  host="$("$ROOT_DIR/scripts/get-instance-ip.sh")"
+  host="$("$ROOT_DIR/scripts/internal/get-instance-ip.sh")"
 fi
 port="${2:-22}"
 timeout_seconds="${WAIT_SSH_TIMEOUT:-300}"

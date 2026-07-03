@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/internal/common.sh"
 
 usage() {
   cat <<'USAGE'
@@ -27,7 +27,7 @@ if [[ "$existing" == "$LIGHTSAIL_INSTANCE_NAME" ]]; then
   die "Lightsail instance already exists: $LIGHTSAIL_INSTANCE_NAME. Delete it first or choose another name."
 fi
 
-"$ROOT_DIR/scripts/render-cloud-init.sh"
+"$ROOT_DIR/scripts/internal/render-cloud-init.sh"
 
 create_args=(lightsail create-instances
   --instance-names "$LIGHTSAIL_INSTANCE_NAME"
@@ -55,11 +55,11 @@ if bool_is_true "${USE_STATIC_IP:-false}"; then
   aws_cli lightsail attach-static-ip --static-ip-name "$LIGHTSAIL_STATIC_IP_NAME" --instance-name "$LIGHTSAIL_INSTANCE_NAME" >/dev/null
 fi
 
-"$ROOT_DIR/scripts/open-ports.sh"
+"$ROOT_DIR/scripts/internal/open-ports.sh"
 
 info "Waiting for instance to expose a public IP..."
 for _ in {1..60}; do
-  SERVER_IP="$("$ROOT_DIR/scripts/get-instance-ip.sh" 2>/dev/null || true)"
+  SERVER_IP="$("$ROOT_DIR/scripts/internal/get-instance-ip.sh" 2>/dev/null || true)"
   if [[ -n "$SERVER_IP" ]]; then
     break
   fi
@@ -67,9 +67,9 @@ for _ in {1..60}; do
 done
 [[ -n "${SERVER_IP:-}" ]] || die "Instance did not get a public IP in time."
 
-"$ROOT_DIR/scripts/wait-ssh.sh" "$SERVER_IP" 22 || warn "SSH was not reachable yet. cloud-init may still be running."
+"$ROOT_DIR/scripts/internal/wait-ssh.sh" "$SERVER_IP" 22 || warn "SSH was not reachable yet. cloud-init may still be running."
 
-SERVER_IP="$SERVER_IP" "$ROOT_DIR/scripts/render-client-configs.sh"
+SERVER_IP="$SERVER_IP" "$ROOT_DIR/scripts/internal/render-client-configs.sh"
 
 cat <<EOF
 Instance created.

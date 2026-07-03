@@ -1,6 +1,6 @@
 Set-StrictMode -Version Latest
 
-$Script:RepoRoot = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
+$Script:RepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSCommandPath))
 $Script:OutputDir = Join-Path $Script:RepoRoot 'output'
 
 function Write-Info {
