@@ -21,9 +21,6 @@ open_port() {
 }
 
 open_port tcp 443 443 0.0.0.0/0
-if bool_is_true "${HYSTERIA_ENABLED:-false}"; then
-  open_port udp 443 443 0.0.0.0/0
-fi
 open_port tcp 22 22 "$SSH_ALLOWED_CIDR"
 
 info "Requested Lightsail firewall updates."

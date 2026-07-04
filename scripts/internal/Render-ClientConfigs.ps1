@@ -20,22 +20,11 @@ $vlessJson = Replace-Tokens $vlessJsonTemplate $config @('SERVER_IP', 'NODE_NAME
 Assert-NoUnrenderedTokens $vlessJson 'vless-reality.json.tpl'
 Save-TextFileNoBom (Join-Path $Script:OutputDir 'vless-reality.json') $vlessJson
 
-$subscription = @($vlessUrl)
-
-if (Is-TrueValue ([string]$config['HYSTERIA_ENABLED'])) {
-  Require-Config $config @('HYSTERIA_PASSWORD', 'HYSTERIA_SNI')
-  $hyUrl = ('hysteria2://{0}@{1}:443/?insecure=1&sni={2}#{3}-hy2' -f $config['HYSTERIA_PASSWORD'], $config['SERVER_IP'], $config['HYSTERIA_SNI'], $nodeName)
-  Save-TextFileNoBom (Join-Path $Script:OutputDir 'hysteria2-url.txt') ($hyUrl + "`n")
-  $hyTemplate = Get-Content (Join-Path $Script:RepoRoot 'client-config\hysteria2.yaml.tpl') -Raw
-  $hyConfig = Replace-Tokens $hyTemplate $config @('SERVER_IP', 'NODE_NAME', 'HYSTERIA_PASSWORD', 'HYSTERIA_SNI')
-  Assert-NoUnrenderedTokens $hyConfig 'hysteria2.yaml.tpl'
-  Save-TextFileNoBom (Join-Path $Script:OutputDir 'hysteria2.yaml') $hyConfig
-  $subscription += $hyUrl
-}
-
-$subText = ($subscription -join "`n") + "`n"
+$subText = $vlessUrl + "`n"
 Save-TextFileNoBom (Join-Path $Script:OutputDir 'subscription.txt') $subText
 $subBase64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($subText))
 Save-TextFileNoBom (Join-Path $Script:OutputDir 'subscription.base64.txt') ($subBase64 + "`n")
+
+
 Write-Info 'Rendered local client files under output/.'
 Write-Info 'These files contain proxy credentials and are ignored by git.'

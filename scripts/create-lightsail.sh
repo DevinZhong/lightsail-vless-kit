@@ -79,12 +79,6 @@ Client files:
   output/vless-reality-url.txt
   output/subscription.txt
 EOF
-if bool_is_true "${HYSTERIA_ENABLED:-false}"; then
-  cat <<EOF
-  output/hysteria2-url.txt
-EOF
-fi
-
 cat <<'EOF'
 
 Server checks after SSH is ready:

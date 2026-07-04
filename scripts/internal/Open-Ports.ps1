@@ -18,6 +18,5 @@ function Open-Port {
 }
 
 Open-Port tcp 443 443 '0.0.0.0/0'
-if (Is-TrueValue ([string]$config['HYSTERIA_ENABLED'])) { Open-Port udp 443 443 '0.0.0.0/0' }
 Open-Port tcp 22 22 ([string]$config['SSH_ALLOWED_CIDR'])
 Write-Info 'Requested Lightsail firewall updates.'

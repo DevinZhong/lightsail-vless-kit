@@ -5,7 +5,7 @@
 ## 本地配置文件
 
 - `.env.local`：部署参数，例如 AWS 区域、实例名、Lightsail key pair 名称。
-- `secrets.local.env`：代理协议凭据，例如 VLESS UUID、Reality key、Hysteria2 password。
+- `secrets.local.env`：代理协议凭据，例如 VLESS UUID、Reality key、Reality short id。
 
 这两个文件都被 `.gitignore` 忽略。
 

@@ -130,7 +130,6 @@ aws sts get-caller-identity
 
 ```text
 output/vless-reality-url.txt
-output/hysteria2-url.txt
 output/subscription.txt
 ```
 

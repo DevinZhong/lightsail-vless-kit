@@ -63,7 +63,7 @@ SSH_ALLOWED_CIDR=<your-public-ip>/32
 
 1. 渲染 `output/cloud-init.sh`。
 2. 创建 Lightsail Ubuntu 实例。
-3. 开放 SSH、TCP 443，以及启用 Hysteria2 时的 UDP 443。
+3. 开放 SSH 和 TCP 443。
 4. 等待公网 IP 和 SSH。
 5. 渲染本地客户端导入文件。
 
@@ -71,7 +71,6 @@ SSH_ALLOWED_CIDR=<your-public-ip>/32
 
 ```text
 output/vless-reality-url.txt
-output/hysteria2-url.txt
 output/subscription.txt
 ```
 

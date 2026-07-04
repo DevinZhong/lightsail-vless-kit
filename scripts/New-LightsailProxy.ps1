@@ -55,7 +55,6 @@ Write-Host ''
 Write-Host 'Client files:'
 Write-Host '  output/vless-reality-url.txt'
 Write-Host '  output/subscription.txt'
-if (Is-TrueValue ([string]$config['HYSTERIA_ENABLED'])) { Write-Host '  output/hysteria2-url.txt' }
 Write-Host ''
 Write-Host 'Server checks after SSH is ready:'
 Write-Host '  sudo systemctl status xray'

@@ -47,7 +47,6 @@ if (-not $Force -and $existing.ContainsKey('REALITY_PRIVATE_KEY') -and $existing
 }
 
 $shortId = Existing-OrNew 'REALITY_SHORT_ID' { Get-RandomHex 8 }
-$hysteriaPassword = Existing-OrNew 'HYSTERIA_PASSWORD' { Get-RandomHex 24 }
 
 $text = @"
 # Local proxy secrets. Do not commit.
@@ -55,7 +54,6 @@ VLESS_UUID=$vlessUuid
 REALITY_PRIVATE_KEY=$realityPrivate
 REALITY_PUBLIC_KEY=$realityPublic
 REALITY_SHORT_ID=$shortId
-HYSTERIA_PASSWORD=$hysteriaPassword
 "@
 Save-TextFileNoBom $secretsPath $text
 Write-Info "Wrote $secretsPath"

@@ -2,7 +2,7 @@
 
 低成本、低维护、可重复重建的个人固定外网出口环境项目。
 
-目标是用本地脚本快速创建 AWS Lightsail Ubuntu 节点，通过 cloud-init 自动部署 Xray-core VLESS Reality TCP 443，并可选部署 Hysteria2 UDP 443 作为备用。Windows 客户端首选 v2rayN，重建后手动导入本地生成的节点 URL。
+目标是用本地脚本快速创建 AWS Lightsail Ubuntu 节点，通过 cloud-init 自动部署 Xray-core VLESS Reality TCP 443。Windows 客户端首选 v2rayN，重建后手动导入本地生成的节点 URL。
 
 ## 当前定位
 
@@ -11,7 +11,6 @@
 - 默认系统：Ubuntu 24.04 LTS / `ubuntu_24_04`
 - 默认套餐：Linux $5/月档 / `nano_3_0`
 - 主协议：Xray-core VLESS Reality Vision TCP 443
-- 备用协议：Hysteria2 UDP 443，可关闭
 - 客户端：Windows v2rayN 首选
 - 订阅策略：不维护远程固定订阅地址；每次重建生成本地 URL，手动导入客户端
 
@@ -22,8 +21,7 @@
 - AWS access key、AWS secret key、AWS session token
 - SSH 私钥、服务器登录密码
 - VLESS UUID、Reality private key、short id
-- Hysteria2 password
-- 完整 VLESS/Hysteria2 分享链接、订阅文件、二维码
+- 完整 VLESS 分享链接、订阅文件、二维码
 - `output/` 下的渲染结果
 - `.env.local`、`secrets.local.env`
 
@@ -52,7 +50,6 @@ Copy-Item secrets.example.env secrets.local.env
 
 ```text
 output/vless-reality-url.txt
-output/hysteria2-url.txt
 output/subscription.txt
 ```
 
@@ -118,7 +115,6 @@ scripts/delete-lightsail.sh
 - 不使用 3x-ui、v2ray-agent、Docker、Web 面板，减少维护面和攻击面。
 - 默认不使用 Static IP，因为“IP 不行就快速重建”的模式更适合新 IP。
 - 不维护远程固定订阅地址，重建频率低时手动导入本地 URL 更简单。
-- Hysteria2 是备用协议，UDP 网络不稳定时可在 `.env.local` 设置 `HYSTERIA_ENABLED=false`。
 
 ## 开源复用判断
 

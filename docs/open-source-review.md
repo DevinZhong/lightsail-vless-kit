@@ -54,7 +54,7 @@
 
 - AWS Lightsail CLI 参数稳定性。
 - Ubuntu cloud-init 行为。
-- Xray / Hysteria2 安装源可用性。
+- Xray 安装源可用性。
 - v2rayN 配置结构变化。
 
 最容易老化的是 v2rayN 配置数据库脚本。这个脚本对个人很有用，但开源后应明确标为“可选客户端辅助工具”，不要作为部署主链路的硬依赖。
