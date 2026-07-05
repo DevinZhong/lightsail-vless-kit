@@ -19,7 +19,7 @@
 重建前先跑：
 
 ```powershell
-.\scripts\Test-NodeConnectivity.ps1
+.\scripts\Manage-LightsailProxy.ps1 -Action Test
 ```
 
 ## 快速重建
@@ -27,13 +27,13 @@
 默认交互式确认：
 
 ```powershell
-.\scripts\Rebuild-LightsailProxy.ps1
+.\scripts\Manage-LightsailProxy.ps1 -Action Rebuild
 ```
 
-无人值守或你已经确认要删旧建新：
+无人值守或你已经确认要删旧建新时，使用高级动作脚本：
 
 ```powershell
-.\scripts\Rebuild-LightsailProxy.ps1 -Yes
+.\scripts\actions\Rebuild-LightsailProxy.ps1 -Yes
 ```
 
 这个脚本会：
@@ -50,13 +50,13 @@
 交互式确认：
 
 ```powershell
-.\scripts\Remove-LightsailProxy.ps1
+.\scripts\Manage-LightsailProxy.ps1 -Action Delete
 ```
 
-跳过确认：
+跳过确认时，使用高级动作脚本：
 
 ```powershell
-.\scripts\Remove-LightsailProxy.ps1 -Yes
+.\scripts\actions\Remove-LightsailProxy.ps1 -Yes
 ```
 
 删除脚本只删除 Lightsail 实例，不删除：
@@ -81,7 +81,7 @@
 ## 重建后检查清单
 
 ```powershell
-.\scripts\Test-NodeConnectivity.ps1
+.\scripts\Manage-LightsailProxy.ps1 -Action Test
 ```
 
 然后确认：

@@ -3,7 +3,7 @@ param(
   [int]$WaitSeconds = 45
 )
 
-. "$PSScriptRoot\internal\common.ps1"
+. "$PSScriptRoot\..\internal\common.ps1"
 
 if (-not $Yes) {
   Write-Warn 'This will delete the current Lightsail instance and create a new one with the same local secrets.'

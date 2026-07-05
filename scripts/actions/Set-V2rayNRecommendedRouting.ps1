@@ -11,7 +11,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$outputDir = Resolve-Path (Join-Path $PSScriptRoot '..\output')
+$outputDir = Resolve-Path (Join-Path $PSScriptRoot '..\..\output')
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 function Set-Utf8NoBomContent {
   param(

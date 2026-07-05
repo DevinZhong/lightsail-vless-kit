@@ -12,7 +12,7 @@ param(
   [switch]$ApplyV2rayNRouting
 )
 
-. "$PSScriptRoot\internal\common.ps1"
+. "$PSScriptRoot\..\internal\common.ps1"
 
 $config = Get-LocalConfig
 Require-Config $config @('AWS_REGION', 'LIGHTSAIL_INSTANCE_NAME', 'AWS_AZ')
@@ -388,7 +388,7 @@ while ($true) {
 }
 
 Write-Info 'Generating v2rayN routing helper files...'
-& "$PSScriptRoot\internal\Render-V2rayNRoutingRules.ps1"
+& "$PSScriptRoot\..\internal\Render-V2rayNRoutingRules.ps1"
 if ($LASTEXITCODE -ne 0) { Die 'v2rayN routing helper generation failed.' }
 
 $urlPath = Join-Path $Script:OutputDir 'vless-reality-url.txt'
@@ -413,7 +413,7 @@ Write-Host "  $(Join-Path $Script:OutputDir 'v2rayn-routing-notes.txt')"
 Write-Host ''
 Write-Host 'v2rayN note:'
 Write-Host '  VLESS URLs cannot embed routing rules. Import the node URL first, then import/adapt the generated routing JSON if your v2rayN version supports it.'
-Write-Host '  Or close v2rayN and run: .\scripts\Set-V2rayNRecommendedRouting.ps1 -Apply'
+Write-Host '  Or close v2rayN and run: .\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting'
 
 if ($ApplyV2rayNRouting) {
   Write-Host ''

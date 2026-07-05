@@ -7,7 +7,7 @@ param(
   [switch]$RecreateIfLocalPemMissing
 )
 
-. "$PSScriptRoot\internal\common.ps1"
+. "$PSScriptRoot\..\internal\common.ps1"
 
 $config = Get-LocalConfig
 $envPath = Join-Path $Script:RepoRoot '.env.local'

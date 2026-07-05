@@ -36,14 +36,20 @@
 
 初次部署按 [docs/quickstart.md](docs/quickstart.md) 走。
 
-Windows PowerShell 主路径：
+Windows PowerShell 主路径只需要一个统一入口：
 
 ```powershell
 Copy-Item .env.example .env.local
 Copy-Item secrets.example.env secrets.local.env
-.\scripts\Generate-Secrets.ps1
-.\scripts\New-LightsailProxy.ps1
-.\scripts\Test-NodeConnectivity.ps1
+.\scripts\Manage-LightsailProxy.ps1
+```
+
+常用动作也可以直接指定：
+
+```powershell
+.\scripts\Manage-LightsailProxy.ps1 -Action SwitchRegion
+.\scripts\Manage-LightsailProxy.ps1 -Action Test
+.\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting
 ```
 
 创建完成后，本地客户端 URL 会生成到：
@@ -59,14 +65,15 @@ output/subscription.txt
 
 节点不可用、IP 声誉异常或想换区域时，见 [docs/rebuild-and-delete.md](docs/rebuild-and-delete.md)。
 
-常用命令：
+常用动作：
 
 ```powershell
-.\scripts\Rebuild-LightsailProxy.ps1
-.\scripts\Remove-LightsailProxy.ps1
+.\scripts\Manage-LightsailProxy.ps1 -Action Rebuild
+.\scripts\Manage-LightsailProxy.ps1 -Action Delete
+.\scripts\Manage-LightsailProxy.ps1 -Action SwitchRegion
 ```
 
-重建后 IP 和客户端 URL 会变化，需要重新导入 v2rayN。
+重建或切换区域后 IP 和客户端 URL 会变化，需要重新导入 v2rayN。
 
 ## 文档索引
 
@@ -94,20 +101,18 @@ output/subscription.txt
 核心 PowerShell 入口：
 
 ```text
-scripts/Generate-Secrets.ps1
-scripts/New-LightsailProxy.ps1
-scripts/Rebuild-LightsailProxy.ps1
-scripts/Remove-LightsailProxy.ps1
-scripts/Test-NodeConnectivity.ps1
+scripts/Manage-LightsailProxy.ps1
 ```
 
-Bash 脚本保留给 Linux/macOS/WSL：
+具体动作脚本位于 `scripts/actions/`，由统一入口调用；高级调试时才需要直接进入。
+
+Bash 兼容入口保留给 Linux/macOS/WSL：
 
 ```text
-scripts/generate-secrets.sh
-scripts/create-lightsail.sh
-scripts/rebuild-proxy.sh
-scripts/delete-lightsail.sh
+scripts/bash/generate-secrets.sh
+scripts/bash/create-lightsail.sh
+scripts/bash/rebuild-proxy.sh
+scripts/bash/delete-lightsail.sh
 ```
 
 ## 设计取舍

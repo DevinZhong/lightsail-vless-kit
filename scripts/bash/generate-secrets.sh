@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/internal/common.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../internal/common.sh"
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/generate-secrets.sh [--force]
+Usage: scripts/bash/generate-secrets.sh [--force]
 
 Generates VLESS Reality secrets into secrets.local.env.
 Requires xray in PATH to generate REALITY x25519 keys.

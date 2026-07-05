@@ -48,7 +48,7 @@ SSH_ALLOWED_CIDR=<your-public-ip>/32
 ## 3. 生成代理协议密钥
 
 ```powershell
-.\scripts\Generate-Secrets.ps1
+.\scripts\Manage-LightsailProxy.ps1 -Action GenerateSecrets
 ```
 
 脚本会写入 `secrets.local.env`。如果本机没有 `xray.exe`，可以在可信环境运行 `xray uuid`、`xray x25519`、`openssl rand -hex 8` 后手动填写。
@@ -56,7 +56,7 @@ SSH_ALLOWED_CIDR=<your-public-ip>/32
 ## 4. 创建 Lightsail 节点
 
 ```powershell
-.\scripts\New-LightsailProxy.ps1
+.\scripts\Manage-LightsailProxy.ps1 -Action Create
 ```
 
 脚本会完成：
@@ -79,7 +79,7 @@ output/subscription.txt
 先在本机检查云侧和端口：
 
 ```powershell
-.\scripts\Test-NodeConnectivity.ps1
+.\scripts\Manage-LightsailProxy.ps1 -Action Test
 ```
 
 如果需要登录服务器：
@@ -110,10 +110,10 @@ Windows 首选 v2rayN：
 关闭 v2rayN 后，可以应用推荐设置：
 
 ```powershell
-.\scripts\Set-V2rayNRecommendedRouting.ps1 -ProfileAddress '<server-ip>' -Apply
+.\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting
 ```
 
-不传 `-ProfileAddress` 时，脚本只维护路由/TUN 设置，不会改节点 SNI。
+统一入口会维护推荐路由/TUN 设置；需要指定 `-ProfileAddress` 等高级参数时，可直接调用 `scripts/actions/Set-V2rayNRecommendedRouting.ps1`。
 
 ## Bash 路径
 
@@ -122,8 +122,8 @@ Windows 首选 v2rayN：
 ```bash
 cp .env.example .env.local
 cp secrets.example.env secrets.local.env
-./scripts/generate-secrets.sh
-./scripts/create-lightsail.sh
+./scripts/bash/generate-secrets.sh
+./scripts/bash/create-lightsail.sh
 ```
 
 当前项目主维护路径是 PowerShell，Bash 脚本用于 Linux/macOS/WSL 复用。

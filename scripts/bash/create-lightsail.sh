@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/internal/common.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../internal/common.sh"
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/create-lightsail.sh
+Usage: scripts/bash/create-lightsail.sh
 
 Creates one AWS Lightsail instance and injects rendered cloud-init.
 Requires AWS CLI to be authenticated before running.

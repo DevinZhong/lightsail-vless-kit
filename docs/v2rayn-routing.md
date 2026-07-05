@@ -77,13 +77,13 @@ v2rayN 使用的 `geosite.dat` 规则来自社区维护的 domain-list 数据，
 查看将要修改什么，不改文件：
 
 ```powershell
-.\scripts\Set-V2rayNRecommendedRouting.ps1
+.\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting
 ```
 
 关闭 v2rayN 后应用推荐配置。如果 v2rayN 安装在 `C:\Program Files\v2rayN`，请用管理员 PowerShell 运行；普通权限下脚本会跳过只读配置目录：
 
 ```powershell
-.\scripts\Set-V2rayNRecommendedRouting.ps1 -Apply
+.\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting
 ```
 
 脚本会：
@@ -97,7 +97,7 @@ v2rayN 使用的 `geosite.dat` 规则来自社区维护的 domain-list 数据，
 如果节点 IP 变化，可以传参：
 
 ```powershell
-.\scripts\Set-V2rayNRecommendedRouting.ps1 -ProfileAddress '<server-ip>' -RealityServerName 'www.cloudflare.com' -Apply
+.\scripts\actions\Set-V2rayNRecommendedRouting.ps1 -ProfileAddress '<server-ip>' -RealityServerName 'www.cloudflare.com' -Apply
 ```
 
 应用后重启 v2rayN，并在界面确认：
@@ -112,8 +112,8 @@ v2rayN 使用的 `geosite.dat` 规则来自社区维护的 domain-list 数据，
 1. 安装 v2rayN。
 2. 导入 `output/vless-reality-url.txt` 的节点链接。
 3. 测试节点延迟和浏览器访问。
-4. 运行 `Set-V2rayNRecommendedRouting.ps1` dry-run。
-5. 关闭 v2rayN，运行 `Set-V2rayNRecommendedRouting.ps1 -Apply`。
+4. 运行 `Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting` 前先关闭 v2rayN；需要 dry-run 时直接调用 `scripts/actions/Set-V2rayNRecommendedRouting.ps1`。
+5. 关闭 v2rayN，运行 `Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting`。
 6. 以管理员身份启动 v2rayN，打开 TUN。
 7. 测试 `https://chatgpt.com`、`https://github.com`、国内网站和命令行包管理器。
 

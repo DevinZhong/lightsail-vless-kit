@@ -2,7 +2,7 @@ param(
   [switch]$Force
 )
 
-. "$PSScriptRoot\internal\common.ps1"
+. "$PSScriptRoot\..\internal\common.ps1"
 
 $secretsPath = Join-Path $Script:RepoRoot 'secrets.local.env'
 $existing = Read-DotEnvFile $secretsPath

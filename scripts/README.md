@@ -1,6 +1,46 @@
 # scripts
 
-这里放可复用、脱敏、可审计的脚本。
+这里放本项目的本地操作脚本。普通使用只需要记住一个入口：
+
+```powershell
+.\scripts\Manage-LightsailProxy.ps1
+```
+
+`Manage-LightsailProxy.ps1` 会用交互菜单调用具体动作，包括区域切换、创建、重建、删除、连通性测试、v2rayN 路由设置、v2rayN core 测试、key pair 准备、PEM 修复和节点直连路由。
+
+也可以直接指定动作：
+
+```powershell
+.\scripts\Manage-LightsailProxy.ps1 -Action SwitchRegion
+.\scripts\Manage-LightsailProxy.ps1 -Action Test
+.\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting
+```
+
+## 目录结构
+
+| 路径 | 说明 |
+| --- | --- |
+| `Manage-LightsailProxy.ps1` | 唯一推荐的日常 PowerShell 入口 |
+| `actions/` | 具体动作脚本，由统一入口调用；高级调试时可直接运行 |
+| `internal/` | 公共库、模板渲染、AWS/Lightsail helper；不要直接运行 |
+| `bash/` | Linux/macOS/WSL 兼容入口；当前主维护路径仍是 PowerShell |
+
+## 动作菜单
+
+| Action | 作用 |
+| --- | --- |
+| `SwitchRegion` | 选择目标区域，删除当前实例并创建目标区域节点；东京默认排第一 |
+| `Test` | 检查当前实例、TCP 22/443、服务端 Xray/Reality 配置 |
+| `Create` | 使用当前 `.env.local` 创建节点 |
+| `Rebuild` | 在当前区域删除并重建节点 |
+| `Delete` | 删除当前 Lightsail 实例 |
+| `AddBypassRoute` | 给当前节点 IP 添加本机直连路由，避免调试流量绕进其他代理/TUN |
+| `RemoveBypassRoute` | 移除当前节点 IP 的本机直连路由 |
+| `ApplyV2rayNRouting` | 关闭 v2rayN 后，写入推荐路由/TUN 设置 |
+| `TestV2rayNCore` | 退出 v2rayN 后，用 v2rayN 自带 Xray core 做本地代理直测 |
+| `GenerateSecrets` | 生成或补齐本地代理协议密钥 |
+| `EnsureKeyPair` | 确保当前区域 Lightsail key pair 存在，并回写 `SSH_KEY_NAME` |
+| `RepairPem` | 修复本地 PEM 私钥换行格式 |
 
 ## 本地配置文件
 
@@ -9,84 +49,48 @@
 
 这两个文件都被 `.gitignore` 忽略。
 
-## 用户直接运行
+## 区域切换
 
-Windows / PowerShell 是当前主维护路径。日常建议从统一入口进入：
-
-```powershell
-.\scripts\Manage-LightsailProxy.ps1
-```
-
-也可以用 `-Action` 直接执行某个动作：
+日常从统一入口选择 `Switch region / rebuild node`：
 
 ```powershell
 .\scripts\Manage-LightsailProxy.ps1 -Action SwitchRegion
-.\scripts\Manage-LightsailProxy.ps1 -Action Test
 ```
 
-底层脚本仍然可以直接运行：
+切换脚本会用方向键菜单选择目标区域，东京默认排在第一位。选择预设区域后会显示默认值，按 Enter 接受或输入新值覆盖。它会删除当前 `.env.local` 指向的实例，切换配置到目标区域，确保目标区域 Lightsail key pair 存在并回写 `SSH_KEY_NAME`，创建新节点，执行直连和服务端验证，生成客户端 URL，并在终端打印 v2rayN 可导入的 VLESS URL。
+
+如果验证发现当前 IP 从本机直连不可用，脚本会询问是否删除该实例并在同一区域重建。
+
+## v2rayN 路由
+
+VLESS URL 不能嵌入 v2rayN 路由规则。区域切换会额外生成：
+
+```text
+output/v2rayn-routing-rules.json
+output/v2rayn-routing-bundle.json
+output/v2rayn-routing-notes.txt
+```
+
+关闭 v2rayN 后，可以从统一入口应用推荐设置：
 
 ```powershell
-.\scripts\Generate-Secrets.ps1
-.\scripts\New-LightsailProxy.ps1
-.\scripts\Test-NodeConnectivity.ps1
-.\scripts\Rebuild-LightsailProxy.ps1
-.\scripts\Remove-LightsailProxy.ps1
+.\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting
 ```
 
-这些是主流程入口：
+## Bash 兼容入口
 
-| 脚本 | 作用 |
-| --- | --- |
-| `Manage-LightsailProxy.ps1` | 统一交互入口，封装切换、创建、重建、删除、测试和 v2rayN 辅助功能 |
-| `Generate-Secrets.ps1` | 生成或补齐本地代理协议密钥 |
-| `New-LightsailProxy.ps1` | 创建 Lightsail 实例并生成客户端导入文件 |
-| `Test-NodeConnectivity.ps1` | 检查实例状态、IP、TCP 22/443 可达性 |
-| `Rebuild-LightsailProxy.ps1` | 删除当前实例并用同一份本地配置重建 |
-| `Remove-LightsailProxy.ps1` | 删除当前 Lightsail 实例 |
-
-可选的本机/客户端辅助脚本：
-
-| 脚本 | 作用 |
-| --- | --- |
-| `Set-V2rayNRecommendedRouting.ps1` | 修改 v2rayN 推荐路由和基础 TUN 设置 |
-| `Test-V2rayNCore.ps1` | 退出 v2rayN 后，用 v2rayN 自带 Xray core 做本地直测 |
-| `Add-NodeBypassRoute.ps1` | 给当前节点 IP 加直连路由，避免调试流量绕进其他代理/TUN |
-| `Remove-NodeBypassRoute.ps1` | 移除上面的直连路由 |
-| `Repair-LightsailPem.ps1` | 修复本地 Lightsail PEM 私钥换行格式 |
-
-Bash 兼容入口保留给 Linux/macOS/WSL：
+Bash 脚本移到了 `scripts/bash/`，保留给 Linux/macOS/WSL 复用：
 
 ```bash
-./scripts/generate-secrets.sh
-./scripts/create-lightsail.sh
-./scripts/rebuild-proxy.sh
-./scripts/delete-lightsail.sh --yes
+./scripts/bash/generate-secrets.sh
+./scripts/bash/create-lightsail.sh
+./scripts/bash/rebuild-proxy.sh
+./scripts/bash/delete-lightsail.sh --yes
 ```
-
-## 内部脚本
-
-`scripts/internal/` 里的脚本由上面的入口调用，普通使用时不用手动运行：
-
-| 类型 | 脚本 | 说明 |
-| --- | --- | --- |
-| 公共库 | `common.ps1`, `common.sh` | 读取本地配置、公共输出、模板替换、AWS CLI 包装 |
-| 渲染 | `Render-CloudInit.ps1`, `Render-ClientConfigs.ps1`, `render-cloud-init.sh`, `render-client-configs.sh` | 从模板生成 cloud-init 和客户端文件 |
-| 云侧 helper | `Open-Ports.ps1`, `Get-InstanceIp.ps1`, `open-ports.sh`, `get-instance-ip.sh` | 开放 Lightsail 端口、查询实例公网 IP |
-| 等待/检查 helper | `Wait-Ssh.ps1`, `wait-ssh.sh` | 等待 SSH 端口可用 |
-
-## v2rayN 推荐路由和 TUN 设置
-
-```powershell
-.\scripts\Set-V2rayNRecommendedRouting.ps1
-.\scripts\Set-V2rayNRecommendedRouting.ps1 -ProfileAddress '<server-ip>' -Apply
-```
-
-不传 `-ProfileAddress` 时只维护路由/TUN，不更新任何节点 SNI。
 
 ## 安全边界
 
-不要在脚本中保存：
+不要在脚本中保存或提交：
 
 - AWS access key / secret key / session token
 - SSH 私钥内容
@@ -95,44 +99,3 @@ Bash 兼容入口保留给 Linux/macOS/WSL：
 - 二维码或完整客户端导出配置
 
 `output/` 下的渲染结果包含代理连接凭据，只能本地使用，不提交。
-
-## 区域切换一键入口
-
-区域切换也可以从统一入口选择 `Switch region / rebuild node`。直接运行切换脚本会用方向键菜单选择目标区域，东京默认排在第一位；选择预设区域后会显示默认值，按 Enter 接受或输入新值覆盖：
-
-```powershell
-.\scripts\Switch-LightsailRegion.ps1
-```
-
-也可以跳过区域选择，直接指定预设区域，例如切回东京：
-
-```powershell
-.\scripts\Switch-LightsailRegion.ps1 -TargetLocation Tokyo
-```
-
-自定义区域可以在交互菜单里选 `Custom` 后逐项输入，也可以直接显式传区域、可用区和节点名：
-
-```powershell
-.\scripts\Switch-LightsailRegion.ps1 `
-  -TargetLocation Custom `
-  -TargetRegion ap-southeast-2 `
-  -TargetAz ap-southeast-2a `
-  -TargetInstanceName proxy-sydney-01 `
-  -TargetNodeName aws-sydney-clean
-```
-
-这个脚本会删除当前 `.env.local` 指向的实例，切换配置到目标区域，确保目标区域 Lightsail key pair 存在并回写 `SSH_KEY_NAME`，创建新节点，执行直连和服务端验证，生成客户端 URL，并在终端打印 v2rayN 可导入的 VLESS URL。如果验证发现当前 IP 从本机直连不可用，脚本会询问是否删除该实例并在同一区域重建。
-
-只准备指定区域 key pair：
-
-```powershell
-.\scripts\New-LightsailKeyPair.ps1 -Region ap-southeast-1
-```
-
-v2rayN 规则不能写进 VLESS URL。迁移脚本会额外生成：
-
-```text
-output/v2rayn-routing-rules.json
-output/v2rayn-routing-bundle.json
-output/v2rayn-routing-notes.txt
-```

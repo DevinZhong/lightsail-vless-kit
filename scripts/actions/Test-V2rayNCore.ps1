@@ -30,7 +30,7 @@ if ([string]::IsNullOrWhiteSpace($V2rayNDir)) {
 $xray = Join-Path $V2rayNDir 'bin\xray\xray.exe'
 $assetDir = Join-Path $V2rayNDir 'bin'
 $config = Join-Path $V2rayNDir 'binConfigs\config.json'
-$outputDir = Resolve-Path (Join-Path $PSScriptRoot '..\output')
+$outputDir = Resolve-Path (Join-Path $PSScriptRoot '..\..\output')
 $testConfig = Join-Path $outputDir 'v2rayn-xray-test.config.json'
 $stdoutLog = Join-Path $outputDir 'v2rayn-xray-test.out.log'
 $stderrLog = Join-Path $outputDir 'v2rayn-xray-test.err.log'
@@ -54,7 +54,7 @@ function Get-V2rayNOutboundHost {
 }
 
 function Get-LatestOutputHost {
-  $urlPath = Join-Path $PSScriptRoot '..\output\vless-reality-url.txt'
+  $urlPath = Join-Path $PSScriptRoot '..\..\output\vless-reality-url.txt'
   if (-not (Test-Path -LiteralPath $urlPath)) { return '' }
   $url = Get-Content -LiteralPath $urlPath -Raw
   if ($url -match '@([^:]+):') { return $Matches[1] }

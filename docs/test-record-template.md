@@ -22,7 +22,7 @@
 | 客户端 TUN | 正常启用 | 未测 |  |
 | DNS 解析 | 无明显污染 | 未测 |  |
 | 出口 IP | 显示 Lightsail 节点 IP | 未测 |  |
-| v2rayN Xray 核心直测 | `Test-V2rayNCore.ps1` 成功 | 未测 |  |
+| v2rayN Xray 核心直测 | `Manage-LightsailProxy.ps1 -Action TestV2rayNCore` 成功 | 未测 |  |
 | Reality 握手 | 服务端无 handshake failed | 未测 |  |
 
 ## 常用站点测试

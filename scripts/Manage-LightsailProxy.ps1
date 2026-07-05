@@ -1,5 +1,5 @@
 param(
-  [ValidateSet('', 'SwitchRegion', 'Create', 'Rebuild', 'Delete', 'Test', 'ApplyV2rayNRouting', 'TestV2rayNCore', 'GenerateSecrets', 'Exit')]
+  [ValidateSet('', 'SwitchRegion', 'Create', 'Rebuild', 'Delete', 'Test', 'AddBypassRoute', 'RemoveBypassRoute', 'ApplyV2rayNRouting', 'TestV2rayNCore', 'GenerateSecrets', 'EnsureKeyPair', 'RepairPem', 'Exit')]
   [string]$Action = ''
 )
 
@@ -12,7 +12,7 @@ function Invoke-Script {
     [string[]]$Arguments = @()
   )
 
-  $scriptPath = Join-Path $PSScriptRoot $ScriptName
+  $scriptPath = Join-Path (Join-Path $PSScriptRoot 'actions') $ScriptName
   if (-not (Test-Path -LiteralPath $scriptPath)) { throw "Script not found: $scriptPath" }
   & $scriptPath @Arguments
 }
@@ -97,9 +97,13 @@ $actions = @(
   [pscustomobject]@{ Value = 'Create'; Label = 'Create node from current .env.local' },
   [pscustomobject]@{ Value = 'Rebuild'; Label = 'Rebuild current-region node' },
   [pscustomobject]@{ Value = 'Delete'; Label = 'Delete current node' },
+  [pscustomobject]@{ Value = 'AddBypassRoute'; Label = 'Add direct route for current node IP' },
+  [pscustomobject]@{ Value = 'RemoveBypassRoute'; Label = 'Remove direct route for current node IP' },
   [pscustomobject]@{ Value = 'ApplyV2rayNRouting'; Label = 'Apply recommended v2rayN routing' },
   [pscustomobject]@{ Value = 'TestV2rayNCore'; Label = 'Test local v2rayN core config' },
   [pscustomobject]@{ Value = 'GenerateSecrets'; Label = 'Generate or repair local proxy secrets' },
+  [pscustomobject]@{ Value = 'EnsureKeyPair'; Label = 'Ensure Lightsail key pair for current region' },
+  [pscustomobject]@{ Value = 'RepairPem'; Label = 'Repair local PEM key formatting' },
   [pscustomobject]@{ Value = 'Exit'; Label = 'Exit' }
 )
 
@@ -113,9 +117,13 @@ switch ($Action) {
   'Rebuild' { Invoke-Script 'Rebuild-LightsailProxy.ps1' }
   'Delete' { Invoke-Script 'Remove-LightsailProxy.ps1' }
   'Test' { Invoke-Script 'Test-NodeConnectivity.ps1' -Arguments @('-SshCheck', '-RequireTcp') }
+  'AddBypassRoute' { Invoke-Script 'Add-NodeBypassRoute.ps1' }
+  'RemoveBypassRoute' { Invoke-Script 'Remove-NodeBypassRoute.ps1' }
   'ApplyV2rayNRouting' { Invoke-Script 'Set-V2rayNRecommendedRouting.ps1' -Arguments @('-Apply') }
   'TestV2rayNCore' { Invoke-Script 'Test-V2rayNCore.ps1' }
   'GenerateSecrets' { Invoke-Script 'Generate-Secrets.ps1' }
+  'EnsureKeyPair' { Invoke-Script 'New-LightsailKeyPair.ps1' }
+  'RepairPem' { Invoke-Script 'Repair-LightsailPem.ps1' }
   'Exit' { Write-Host 'Bye.' }
   default { throw "Unsupported action: $Action" }
 }

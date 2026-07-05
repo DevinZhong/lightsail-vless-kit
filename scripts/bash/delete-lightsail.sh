@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/internal/common.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../internal/common.sh"
 
 yes=false
 if [[ "${1:-}" == "--yes" || "${1:-}" == "-y" ]]; then
   yes=true
 elif [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   cat <<'USAGE'
-Usage: scripts/delete-lightsail.sh [--yes]
+Usage: scripts/bash/delete-lightsail.sh [--yes]
 
 Deletes the configured Lightsail instance. Stopping an instance is not enough to avoid all costs.
 USAGE

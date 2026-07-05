@@ -95,10 +95,10 @@ $notes = @(
   '- IPv6: off until your local network is known stable',
   '',
   'Alternative automated local update after importing the node and closing v2rayN:',
-  '  .\scripts\Set-V2rayNRecommendedRouting.ps1 -Apply',
+  '  .\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting',
   '',
   'If the node IP changed and the imported profile address is known:',
-  '  .\scripts\Set-V2rayNRecommendedRouting.ps1 -ProfileAddress ''<server-ip>'' -Apply'
+  '  .\scripts\actions\Set-V2rayNRecommendedRouting.ps1 -ProfileAddress ''<server-ip>'' -Apply'
 ) -join "`n"
 Save-TextFileNoBom $notesPath ($notes + "`n")
 
