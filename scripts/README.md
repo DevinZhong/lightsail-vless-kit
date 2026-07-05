@@ -11,7 +11,20 @@
 
 ## 用户直接运行
 
-Windows / PowerShell 是当前主维护路径：
+Windows / PowerShell 是当前主维护路径。日常建议从统一入口进入：
+
+```powershell
+.\scripts\Manage-LightsailProxy.ps1
+```
+
+也可以用 `-Action` 直接执行某个动作：
+
+```powershell
+.\scripts\Manage-LightsailProxy.ps1 -Action SwitchRegion
+.\scripts\Manage-LightsailProxy.ps1 -Action Test
+```
+
+底层脚本仍然可以直接运行：
 
 ```powershell
 .\scripts\Generate-Secrets.ps1
@@ -25,6 +38,7 @@ Windows / PowerShell 是当前主维护路径：
 
 | 脚本 | 作用 |
 | --- | --- |
+| `Manage-LightsailProxy.ps1` | 统一交互入口，封装切换、创建、重建、删除、测试和 v2rayN 辅助功能 |
 | `Generate-Secrets.ps1` | 生成或补齐本地代理协议密钥 |
 | `New-LightsailProxy.ps1` | 创建 Lightsail 实例并生成客户端导入文件 |
 | `Test-NodeConnectivity.ps1` | 检查实例状态、IP、TCP 22/443 可达性 |
@@ -81,3 +95,44 @@ Bash 兼容入口保留给 Linux/macOS/WSL：
 - 二维码或完整客户端导出配置
 
 `output/` 下的渲染结果包含代理连接凭据，只能本地使用，不提交。
+
+## 区域切换一键入口
+
+区域切换也可以从统一入口选择 `Switch region / rebuild node`。直接运行切换脚本会用方向键菜单选择目标区域，东京默认排在第一位；选择预设区域后会显示默认值，按 Enter 接受或输入新值覆盖：
+
+```powershell
+.\scripts\Switch-LightsailRegion.ps1
+```
+
+也可以跳过区域选择，直接指定预设区域，例如切回东京：
+
+```powershell
+.\scripts\Switch-LightsailRegion.ps1 -TargetLocation Tokyo
+```
+
+自定义区域可以在交互菜单里选 `Custom` 后逐项输入，也可以直接显式传区域、可用区和节点名：
+
+```powershell
+.\scripts\Switch-LightsailRegion.ps1 `
+  -TargetLocation Custom `
+  -TargetRegion ap-southeast-2 `
+  -TargetAz ap-southeast-2a `
+  -TargetInstanceName proxy-sydney-01 `
+  -TargetNodeName aws-sydney-clean
+```
+
+这个脚本会删除当前 `.env.local` 指向的实例，切换配置到目标区域，确保目标区域 Lightsail key pair 存在并回写 `SSH_KEY_NAME`，创建新节点，执行直连和服务端验证，生成客户端 URL，并在终端打印 v2rayN 可导入的 VLESS URL。如果验证发现当前 IP 从本机直连不可用，脚本会询问是否删除该实例并在同一区域重建。
+
+只准备指定区域 key pair：
+
+```powershell
+.\scripts\New-LightsailKeyPair.ps1 -Region ap-southeast-1
+```
+
+v2rayN 规则不能写进 VLESS URL。迁移脚本会额外生成：
+
+```text
+output/v2rayn-routing-rules.json
+output/v2rayn-routing-bundle.json
+output/v2rayn-routing-notes.txt
+```

@@ -33,6 +33,19 @@ if ($config.ContainsKey('SSH_KEY_NAME') -and -not [string]::IsNullOrWhiteSpace([
 Write-Info "Creating Lightsail instance $($config['LIGHTSAIL_INSTANCE_NAME']) in $($config['AWS_AZ'])..."
 Invoke-Aws $config @args | Out-Null
 
+Write-Info 'Waiting for instance state to become running before changing firewall ports...'
+$state = $null
+for ($i = 0; $i -lt 60; $i++) {
+  $state = Invoke-Aws $config lightsail get-instance `
+    --instance-name ([string]$config['LIGHTSAIL_INSTANCE_NAME']) `
+    --query 'instance.state.name' `
+    --output text 2>$null
+  if ($state -eq 'running') { break }
+  Write-Info "Current instance state: $state"
+  Start-Sleep -Seconds 5
+}
+if ($state -ne 'running') { Write-Warn "Instance state is still '$state'. Firewall updates will retry if Lightsail is still transitioning." }
+
 & "$PSScriptRoot\internal\Open-Ports.ps1"
 
 Write-Info 'Waiting for instance to expose a public IP...'

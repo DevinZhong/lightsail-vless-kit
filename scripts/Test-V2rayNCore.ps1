@@ -1,5 +1,5 @@
 param(
-  [string]$V2rayNDir = 'C:\Program Files\v2rayN',
+  [string]$V2rayNDir = '',
   [string]$TestUrl = 'https://api.ipify.org',
   [int]$RequestTimeoutSec = 15
 )
@@ -17,6 +17,15 @@ function Set-Utf8NoBomContent {
   [System.IO.File]::WriteAllText($LiteralPath, $Value, $encoding)
 }
 
+if ([string]::IsNullOrWhiteSpace($V2rayNDir)) {
+  $candidates = @(
+    "$env:USERPROFILE\Apps\v2rayN",
+    'C:\Program Files\v2rayN',
+    "$env:LOCALAPPDATA\v2rayN"
+  )
+  $V2rayNDir = @($candidates | Where-Object { Test-Path -LiteralPath (Join-Path $_ 'v2rayN.exe') } | Select-Object -First 1)[0]
+  if ([string]::IsNullOrWhiteSpace($V2rayNDir)) { $V2rayNDir = $candidates[0] }
+}
 
 $xray = Join-Path $V2rayNDir 'bin\xray\xray.exe'
 $assetDir = Join-Path $V2rayNDir 'bin'
@@ -31,12 +40,44 @@ if (-not (Test-Path -LiteralPath $xray)) { throw "xray.exe not found: $xray" }
 if (-not (Test-Path -LiteralPath $config)) { throw "v2rayN generated config not found: $config" }
 if (-not (Test-Path -LiteralPath (Join-Path $assetDir 'geosite.dat'))) { throw "geosite.dat not found under asset dir: $assetDir" }
 
+function Get-V2rayNOutboundHost {
+  param([object]$Config)
+  foreach ($outbound in @($Config.outbounds)) {
+    if ($outbound.settings -and $outbound.settings.vnext -and @($outbound.settings.vnext).Count -gt 0) {
+      return [string]@($outbound.settings.vnext)[0].address
+    }
+    if ($outbound.settings -and $outbound.settings.servers -and @($outbound.settings.servers).Count -gt 0) {
+      return [string]@($outbound.settings.servers)[0].address
+    }
+  }
+  return ''
+}
+
+function Get-LatestOutputHost {
+  $urlPath = Join-Path $PSScriptRoot '..\output\vless-reality-url.txt'
+  if (-not (Test-Path -LiteralPath $urlPath)) { return '' }
+  $url = Get-Content -LiteralPath $urlPath -Raw
+  if ($url -match '@([^:]+):') { return $Matches[1] }
+  return ''
+}
 $cfg = Get-Content -LiteralPath $config -Raw | ConvertFrom-Json
+$currentOutboundHost = Get-V2rayNOutboundHost -Config $cfg
+$latestOutputHost = Get-LatestOutputHost
+if (-not [string]::IsNullOrWhiteSpace($currentOutboundHost)) {
+  Write-Host "[INFO] v2rayN generated config outbound host: $currentOutboundHost"
+}
+if (-not [string]::IsNullOrWhiteSpace($latestOutputHost)) {
+  Write-Host "[INFO] Latest generated VLESS URL host: $latestOutputHost"
+  if ($currentOutboundHost -and $currentOutboundHost -ne $latestOutputHost) {
+    Write-Host "[WARN] v2rayN is not currently using the latest generated node. Re-import/select the node whose address is $latestOutputHost."
+  }
+}
 if (-not $cfg.log) { $cfg | Add-Member -MemberType NoteProperty -Name log -Value ([pscustomobject]@{}) }
 $cfg.log.loglevel = 'debug'
 Set-Utf8NoBomContent -LiteralPath $testConfig -Value ($cfg | ConvertTo-Json -Depth 100)
 
 $env:XRAY_LOCATION_ASSET = $assetDir
+Write-Host "[INFO] Using v2rayN dir: $V2rayNDir"
 Write-Host "[INFO] Using Xray asset dir: $assetDir"
 Write-Host "[INFO] Using temporary debug config: $testConfig"
 Write-Host '[INFO] Validating temporary Xray config...'
