@@ -126,6 +126,12 @@ Windows 首选 v2rayN：
 
 在菜单中选择 `Apply recommended v2rayN routing`。统一入口会维护推荐路由/TUN 设置；需要指定 `-ProfileAddress` 等高级参数时，才直接调用 `scripts/actions/Set-V2rayNRecommendedRouting.ps1`。
 
+## 区域选择
+
+“切换区域 / 重建节点”会从当前 AWS 账户动态读取 Lightsail 可用区域和 Availability Zone，不再假设某个固定 `a` 区一定可用。菜单将东京、首尔、新加坡作为面向中国大陆用户的优先尝试项；Oregon 和 Virginia 标为“美国 IP”选项。实际网络体验依赖本地运营商和目标服务，请以创建后的连通性检查为准。
+
+选择“全部可用区域”可查看 AWS 当前返回的完整列表。区域迁移会先创建并验证新节点，验证通过后才删除旧节点；迁移期间会短暂同时保留两台实例，可能产生少量重叠费用。若只是同一区域重建，请使用“重建当前区域节点”。
+
 ## Bash 路径
 
 非 Windows 环境也保留 Bash 脚本：

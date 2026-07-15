@@ -46,6 +46,10 @@ Assert-True ($menu -match "'Preflight'") 'The main menu must expose the prefligh
 Assert-True ($menu -match "'SetLanguage'") 'The main menu must expose interface language settings.'
 Assert-True ((Test-Path -LiteralPath (Join-Path $repoRoot 'scripts\actions\Test-LightsailPreflight.ps1'))) 'The preflight action must exist.'
 
+$switchRegion = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\actions\Switch-LightsailRegion.ps1') -Raw
+Assert-True ($switchRegion -match 'get-regions --include-availability-zones') 'Region selection must query Lightsail regions dynamically.'
+Assert-True ($switchRegion -match 'Target validation passed\. Deleting old') 'Region migration must validate the target before deleting the source instance.'
+
 $values = @{
   SERVER_IP = '203.0.113.10'
   NODE_NAME = 'template-test'

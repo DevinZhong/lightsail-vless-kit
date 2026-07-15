@@ -1,5 +1,4 @@
 param(
-  [ValidateSet('', 'Tokyo', 'Singapore', 'Seoul', 'Sydney', 'Oregon', 'Virginia', 'Custom')]
   [string]$TargetLocation = '',
   [string]$TargetRegion = '',
   [string]$TargetAz = '',
@@ -21,41 +20,52 @@ Ensure-OutputDir
 $locationPresets = [ordered]@{
   Tokyo = @{
     Region = 'ap-northeast-1'
-    Az = 'ap-northeast-1a'
     Slug = 'tokyo'
     NodeLabel = 'tokyo'
   }
   Singapore = @{
     Region = 'ap-southeast-1'
-    Az = 'ap-southeast-1a'
     Slug = 'singapore'
     NodeLabel = 'singapore'
   }
   Seoul = @{
     Region = 'ap-northeast-2'
-    Az = 'ap-northeast-2a'
     Slug = 'seoul'
     NodeLabel = 'seoul'
   }
   Sydney = @{
     Region = 'ap-southeast-2'
-    Az = 'ap-southeast-2a'
     Slug = 'sydney'
     NodeLabel = 'sydney'
   }
   Oregon = @{
     Region = 'us-west-2'
-    Az = 'us-west-2a'
     Slug = 'oregon'
     NodeLabel = 'oregon'
   }
   Virginia = @{
     Region = 'us-east-1'
-    Az = 'us-east-1a'
     Slug = 'virginia'
     NodeLabel = 'virginia'
   }
 }
+
+function Get-LightsailRegions {
+  $raw = Invoke-Aws $config lightsail get-regions --include-availability-zones --output json
+  if ($LASTEXITCODE -ne 0) { Die 'Unable to query Lightsail regions. Check AWS CLI authentication and permissions.' }
+  $response = $raw | ConvertFrom-Json
+  $result = @{}
+  foreach ($region in $response.regions) {
+    $zones = @($region.availabilityZones | Where-Object { $_.state -eq 'available' } | ForEach-Object { [string]$_.zoneName })
+    if ($zones.Count -gt 0) {
+      $result[[string]$region.name] = [pscustomobject]@{ Name = [string]$region.name; DisplayName = [string]$region.displayName; Zones = $zones }
+    }
+  }
+  if ($result.Count -eq 0) { Die 'AWS returned no Lightsail regions with an available Availability Zone.' }
+  return $result
+}
+
+$availableRegions = Get-LightsailRegions
 
 function Read-Choice {
   param(
@@ -176,24 +186,38 @@ function Resolve-TargetConfig {
       $TargetLocation = 'Custom'
     } else {
       Write-Host ''
-      $choices = @($locationPresets.Keys) + @('Custom')
+      $choices = @($locationPresets.Keys | Where-Object { $availableRegions.ContainsKey($locationPresets[$_].Region) }) + @('AllRegions', 'Custom')
       $menuItems = @()
       foreach ($choice in $choices) {
         if ($choice -eq 'Custom') {
-          $menuItems += [pscustomobject]@{ Value = $choice; Label = 'Custom' }
+          $menuItems += [pscustomobject]@{ Value = $choice; Label = 'Custom region / 自定义区域' }
+        } elseif ($choice -eq 'AllRegions') {
+          $menuItems += [pscustomobject]@{ Value = $choice; Label = 'All AWS Lightsail regions / 全部可用区域' }
         } else {
           $preset = $locationPresets[$choice]
-          $menuItems += [pscustomobject]@{ Value = $choice; Label = ("{0} ({1} / {2})" -f $choice, $preset.Region, $preset.Az) }
+          $live = $availableRegions[$preset.Region]
+          $tag = switch ($choice) { 'Tokyo' { '推荐 / 推荐' } 'Seoul' { '推荐 / 推荐' } 'Singapore' { '推荐 / 推荐' } 'Oregon' { '美国 IP / US IP' } 'Virginia' { '美国 IP / US IP' } default { '' } }
+          $menuItems += [pscustomobject]@{ Value = $choice; Label = ("{0} {1} ({2} / {3})" -f $choice, $tag, $preset.Region, $live.Zones[0]) }
         }
       }
       $TargetLocation = Read-MenuChoice -Prompt 'Select target Lightsail region:' -Items $menuItems -DefaultIndex 0
     }
   }
 
+  if ($TargetLocation -eq 'AllRegions') {
+    $items = @($availableRegions.Values | Sort-Object DisplayName | ForEach-Object { [pscustomobject]@{ Value = $_.Name; Label = "$($_.DisplayName) ($($_.Name) / $($_.Zones[0]))" } })
+    $TargetRegion = Read-MenuChoice -Prompt 'Select an available Lightsail region:' -Items $items -DefaultIndex 0
+    $TargetAz = [string]$availableRegions[$TargetRegion].Zones[0]
+    if ([string]::IsNullOrWhiteSpace($TargetInstanceName)) { $TargetInstanceName = "proxy-$TargetRegion-01" }
+    if ([string]::IsNullOrWhiteSpace($TargetNodeName)) { $TargetNodeName = "aws-$TargetRegion-clean" }
+    if ([string]::IsNullOrWhiteSpace($TargetStaticIpName)) { $TargetStaticIpName = "proxy-$TargetRegion-static-01" }
+    $TargetLocation = 'Custom'
+  }
+
   if ($TargetLocation -ne 'Custom') {
     $preset = $locationPresets[$TargetLocation]
     if ([string]::IsNullOrWhiteSpace($TargetRegion)) { $TargetRegion = [string]$preset.Region }
-    if ([string]::IsNullOrWhiteSpace($TargetAz)) { $TargetAz = [string]$preset.Az }
+    if ([string]::IsNullOrWhiteSpace($TargetAz)) { $TargetAz = [string]$availableRegions[$TargetRegion].Zones[0] }
     if ([string]::IsNullOrWhiteSpace($TargetInstanceName)) { $TargetInstanceName = "proxy-$($preset.Slug)-01" }
     if ([string]::IsNullOrWhiteSpace($TargetNodeName)) { $TargetNodeName = "aws-$($preset.NodeLabel)-clean" }
     if ([string]::IsNullOrWhiteSpace($TargetStaticIpName)) { $TargetStaticIpName = "proxy-$($preset.Slug)-static-01" }
@@ -309,7 +333,8 @@ function Wait-InstanceDeleted {
 
 if (-not $Yes) {
   Write-Host ''
-  Write-Warn 'This migration deletes the current Lightsail instance before creating the replacement.'
+  Write-Warn 'The replacement will be created and validated before the old instance is deleted.'
+  Write-Warn 'Both instances may run briefly, which can incur a small overlap in Lightsail charges.'
   Write-Warn "Current target: $sourceName in $sourceRegion / $sourceAz"
   Write-Warn "New target:     $TargetInstanceName in $TargetRegion / $TargetAz"
   Write-Warn 'Local secrets are kept, but the server IP and v2rayN import URL will change.'
@@ -320,17 +345,8 @@ if (-not $Yes) {
 Copy-Item -LiteralPath $envPath -Destination $envBackupPath -Force
 Write-Info "Backed up current .env.local to $envBackupPath"
 
-if (Test-LightsailInstanceExists -SourceConfig $config -InstanceName $sourceName) {
-  Write-Info "Deleting old Lightsail instance: $sourceName ($sourceRegion)"
-  & "$PSScriptRoot\Remove-LightsailProxy.ps1" -Yes
-  if ($LASTEXITCODE -ne 0) { Die 'Old instance delete command failed.' }
-  Wait-InstanceDeleted -SourceConfig $config -InstanceName $sourceName -TimeoutSeconds $DeleteTimeoutSeconds
-} else {
-  Write-Warn "Current configured instance does not exist, skipping delete: $sourceName ($sourceRegion)"
-}
-if ($PostDeleteDelaySeconds -gt 0) {
-  Write-Info "Waiting $PostDeleteDelaySeconds seconds before switching config..."
-  Start-Sleep -Seconds $PostDeleteDelaySeconds
+if ($TargetRegion -eq $sourceRegion -and $TargetInstanceName -eq $sourceName) {
+  Die 'The target uses the current region and instance name. Use Rebuild for this destructive operation, or choose a different target instance name for a safe migration.'
 }
 
 Write-Info 'Updating .env.local to target region settings...'
@@ -387,17 +403,20 @@ while ($true) {
   $attempt++
 }
 
+if (Test-LightsailInstanceExists -SourceConfig $config -InstanceName $sourceName) {
+  Write-Info "Target validation passed. Deleting old Lightsail instance: $sourceName ($sourceRegion)"
+  Invoke-Aws $config lightsail delete-instance --instance-name $sourceName | Out-Null
+  Wait-InstanceDeleted -SourceConfig $config -InstanceName $sourceName -TimeoutSeconds $DeleteTimeoutSeconds
+} else {
+  Write-Warn "Current configured instance does not exist, so there is no old instance to delete: $sourceName ($sourceRegion)"
+}
+
 Write-Info 'Generating v2rayN routing helper files...'
 & "$PSScriptRoot\..\internal\Render-V2rayNRoutingRules.ps1"
 if ($LASTEXITCODE -ne 0) { Die 'v2rayN routing helper generation failed.' }
 
 $urlPath = Join-Path $Script:OutputDir 'vless-reality-url.txt'
 $subPath = Join-Path $Script:OutputDir 'subscription.txt'
-$url = ''
-if (Test-Path -LiteralPath $urlPath) {
-  $url = ([IO.File]::ReadAllText($urlPath)).Trim()
-}
-
 Write-Host ''
 Write-Host 'Switch complete.' -ForegroundColor Green
 Write-Host ''
