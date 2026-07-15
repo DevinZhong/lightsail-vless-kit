@@ -94,6 +94,8 @@ output/subscription.txt
 | [docs/test-record-template.md](docs/test-record-template.md) | 测试记录模板 |
 | [docs/open-source-review.md](docs/open-source-review.md) | 开源复用价值和开源前检查 |
 | [docs/releasing.md](docs/releasing.md) | 维护者发布清单 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献、测试和兼容性约定 |
+| [CHANGELOG.md](CHANGELOG.md) | 面向用户的版本变更记录 |
 
 历史参考：
 
