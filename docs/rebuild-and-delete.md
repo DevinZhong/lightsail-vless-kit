@@ -93,5 +93,3 @@
 - v2rayN 已重新导入或更新节点。
 - ChatGPT / GitHub / Google 等目标服务通过。
 - 国内网站直连正常。
-
-如需记录变更，只写脱敏信息到 [deployment-record.md](deployment-record.md)。

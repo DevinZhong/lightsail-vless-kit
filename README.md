@@ -89,18 +89,10 @@ output/subscription.txt
 | [docs/aws-setup.md](docs/aws-setup.md) | IAM、AWS CLI profile、Lightsail key pair |
 | [docs/v2rayn-routing.md](docs/v2rayn-routing.md) | v2rayN 路由、TUN 和客户端辅助脚本 |
 | [docs/maintenance.md](docs/maintenance.md) | 日常维护和排障顺序 |
-| [docs/deployment-record.md](docs/deployment-record.md) | 脱敏部署记录模板 |
 | [docs/client-config-template.md](docs/client-config-template.md) | 客户端配置记录模板 |
-| [docs/test-record-template.md](docs/test-record-template.md) | 测试记录模板 |
-| [docs/open-source-review.md](docs/open-source-review.md) | 开源复用价值和开源前检查 |
 | [docs/releasing.md](docs/releasing.md) | 维护者发布清单 |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献、测试和兼容性约定 |
 | [CHANGELOG.md](CHANGELOG.md) | 面向用户的版本变更记录 |
-
-历史参考：
-
-- [docs/server-runbook.md](docs/server-runbook.md)：人工部署手册，脚本化部署后不再作为主入口。
-- [docs/rebuild-plan.md](docs/rebuild-plan.md)：早期重建规划，当前操作以 `rebuild-and-delete.md` 为准。
 
 ## 脚本索引
 
@@ -132,9 +124,3 @@ scripts/bash/delete-lightsail.sh
 ## 许可证与安全
 
 本项目以 [MIT License](LICENSE) 发布。安全问题请遵循 [SECURITY.md](SECURITY.md)，不要在公开 issue、截图或日志中提交任何连接凭据。
-
-## 开源复用判断
-
-这个项目有开源复用价值，适合定位为“个人固定出口节点的可审计脚本模板”。它不适合包装成大众一键面板，也不适合多用户售卖场景。
-
-项目当前适合作为个人固定出口脚本模板开源；发布操作请按 [docs/releasing.md](docs/releasing.md) 执行。详细评估见 [docs/open-source-review.md](docs/open-source-review.md)。
