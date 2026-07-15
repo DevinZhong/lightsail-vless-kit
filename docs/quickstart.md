@@ -143,4 +143,10 @@ cp secrets.example.env secrets.local.env
 ./scripts/bash/create-lightsail.sh
 ```
 
+也可以使用统一入口：
+
+```bash
+./scripts/lightsail-proxy.sh
+```
+
 当前项目主维护路径是 PowerShell。Bash 路径目前只完成语法 CI 检查，尚未完成 Linux/macOS 实机验证；请将其视作实验性兼容入口。

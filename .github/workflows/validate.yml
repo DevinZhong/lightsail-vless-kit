@@ -25,3 +25,5 @@ jobs:
           for file in scripts/bash/*.sh scripts/internal/*.sh cloud-init/cloud-init.tpl.sh; do
             bash -n "$file"
           done
+          bash -n scripts/lightsail-proxy.sh
+          bash scripts/lightsail-proxy.sh --help

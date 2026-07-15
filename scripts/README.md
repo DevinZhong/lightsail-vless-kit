@@ -90,6 +90,14 @@ Bash 脚本移到了 `scripts/bash/`，作为 Linux/macOS/WSL 的实验性兼容
 ./scripts/bash/delete-lightsail.sh --yes
 ```
 
+也可使用统一入口（Linux/macOS/WSL）：
+
+```bash
+./scripts/lightsail-proxy.sh
+```
+
+目前 Bash 入口覆盖预检、密钥生成、创建、重建和删除；区域迁移、Lightsail key pair 管理及 v2rayN 辅助仍为 PowerShell 专属功能。
+
 ## 安全边界
 
 不要在脚本中保存或提交：
