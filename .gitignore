@@ -46,6 +46,7 @@ qrcode*.png
 # OS/editor noise
 .DS_Store
 Thumbs.db
+debug.log
 .idea/
 .vscode/
 

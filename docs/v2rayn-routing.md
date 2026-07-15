@@ -74,21 +74,21 @@ v2rayN 使用的 `geosite.dat` 规则来自社区维护的 domain-list 数据，
 
 ## 仓库脚本
 
-查看将要修改什么，不改文件：
+查看将要修改什么、不改文件（dry-run，直接调用动作脚本，且不要传 `-Apply`）：
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting
+.\scripts\actions\Set-V2rayNRecommendedRouting.ps1
 ```
 
-关闭 v2rayN 后应用推荐配置。如果 v2rayN 安装在 `C:\Program Files\v2rayN`，请用管理员 PowerShell 运行；普通权限下脚本会跳过只读配置目录：
+关闭 v2rayN 后，运行统一入口并选择 `Apply recommended v2rayN routing`。如果 v2rayN 安装在 `C:\Program Files\v2rayN`，请用管理员 PowerShell 运行；普通权限下脚本会跳过只读配置目录：
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting
+.\scripts\Manage-LightsailProxy.ps1
 ```
 
 脚本会：
 
-- 自动发现 `C:\Program Files\v2rayN` 和 `%LOCALAPPDATA%\v2rayN`。
+- 自动发现 `%USERPROFILE%\v2rayN`、`%USERPROFILE%\Apps\v2rayN`、`C:\Program Files\v2rayN` 和 `%LOCALAPPDATA%\v2rayN`，也支持把 `-V2rayNDirs` 直接指到 `guiConfigs` 目录。
 - 备份 `guiNDB.db` 和 `guiNConfig.json`。
 - 如果传入 `-ProfileAddress`，把匹配节点的 Reality SNI 修正为 `www.cloudflare.com`。
 - 在当前活动路由前部插入 OpenAI / Claude / Google / GitHub / npm / PyPI 强制代理规则。
@@ -112,8 +112,8 @@ v2rayN 使用的 `geosite.dat` 规则来自社区维护的 domain-list 数据，
 1. 安装 v2rayN。
 2. 导入 `output/vless-reality-url.txt` 的节点链接。
 3. 测试节点延迟和浏览器访问。
-4. 运行 `Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting` 前先关闭 v2rayN；需要 dry-run 时直接调用 `scripts/actions/Set-V2rayNRecommendedRouting.ps1`。
-5. 关闭 v2rayN，运行 `Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting`。
+4. 先关闭 v2rayN；需要 dry-run 时运行 `scripts/actions/Set-V2rayNRecommendedRouting.ps1`，不要传 `-Apply`。
+5. 关闭 v2rayN，运行 `Manage-LightsailProxy.ps1`，选择 `Apply recommended v2rayN routing`。
 6. 以管理员身份启动 v2rayN，打开 TUN。
 7. 测试 `https://chatgpt.com`、`https://github.com`、国内网站和命令行包管理器。
 

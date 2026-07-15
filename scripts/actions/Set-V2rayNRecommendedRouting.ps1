@@ -1,5 +1,7 @@
 param(
   [string[]]$V2rayNDirs = @(
+    "$env:USERPROFILE\v2rayN",
+    "$env:USERPROFILE\Apps\v2rayN",
     'C:\Program Files\v2rayN',
     "$env:LOCALAPPDATA\v2rayN"
   ),
@@ -28,14 +30,22 @@ function Get-ExistingConfigDirs {
   foreach ($dir in $V2rayNDirs) {
     if ([string]::IsNullOrWhiteSpace($dir)) { continue }
     $full = [System.IO.Path]::GetFullPath($dir)
-    if ($seen.ContainsKey($full)) { continue }
-    $seen[$full] = $true
+    $candidateRoots = @($full)
+    if ([System.IO.Path]::GetFileName($full) -ieq 'guiConfigs') {
+      $candidateRoots += [System.IO.Path]::GetDirectoryName($full)
+    }
 
-    $db = Join-Path $full 'guiConfigs\guiNDB.db'
-    $json = Join-Path $full 'guiConfigs\guiNConfig.json'
-    if ((Test-Path -LiteralPath $db) -and (Test-Path -LiteralPath $json)) {
+    foreach ($root in $candidateRoots) {
+      if ([string]::IsNullOrWhiteSpace($root)) { continue }
+      if ($seen.ContainsKey($root)) { continue }
+      $seen[$root] = $true
+
+      $db = Join-Path $root 'guiConfigs\guiNDB.db'
+      $json = Join-Path $root 'guiConfigs\guiNConfig.json'
+      if (-not ((Test-Path -LiteralPath $db) -and (Test-Path -LiteralPath $json))) { continue }
+
       [pscustomobject]@{
-        Dir = $full
+        Dir = $root
         Db = $db
         Json = $json
       }

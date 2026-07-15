@@ -16,18 +16,18 @@
 - 本地 TUN、DNS 或路由规则疑似异常。
 - AWS 防火墙漏开端口。
 
-重建前先跑：
+重建前先运行统一入口，并选择 `Test current node connectivity`：
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action Test
+.\scripts\Manage-LightsailProxy.ps1
 ```
 
 ## 快速重建
 
-默认交互式确认：
+运行统一入口，选择 `Rebuild current-region node`，然后按提示确认：
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action Rebuild
+.\scripts\Manage-LightsailProxy.ps1
 ```
 
 无人值守或你已经确认要删旧建新时，使用高级动作脚本：
@@ -47,10 +47,10 @@
 
 ## 只删除实例
 
-交互式确认：
+运行统一入口，选择 `Delete current node`，然后按提示确认：
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action Delete
+.\scripts\Manage-LightsailProxy.ps1
 ```
 
 跳过确认时，使用高级动作脚本：
@@ -81,8 +81,10 @@
 ## 重建后检查清单
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action Test
+.\scripts\Manage-LightsailProxy.ps1
 ```
+
+在菜单中选择 `Test current node connectivity`。
 
 然后确认：
 

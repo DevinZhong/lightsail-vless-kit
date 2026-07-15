@@ -6,9 +6,9 @@
 .\scripts\Manage-LightsailProxy.ps1
 ```
 
-`Manage-LightsailProxy.ps1` 会用交互菜单调用具体动作，包括区域切换、创建、重建、删除、连通性测试、v2rayN 路由设置、v2rayN core 测试、key pair 准备、PEM 修复和节点直连路由。
+`Manage-LightsailProxy.ps1` 会显示交互菜单。日常只运行这一条命令并按提示选择即可，包括区域切换、创建、重建、删除、连通性测试、v2rayN 路由设置、v2rayN core 测试、key pair 准备、PEM 修复和节点直连路由。
 
-也可以直接指定动作：
+只有自动化、排障或已明确知道目标动作时，才直接指定动作：
 
 ```powershell
 .\scripts\Manage-LightsailProxy.ps1 -Action SwitchRegion
@@ -51,10 +51,10 @@
 
 ## 区域切换
 
-日常从统一入口选择 `Switch region / rebuild node`：
+日常运行统一入口，然后选择 `Switch region / rebuild node`：
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action SwitchRegion
+.\scripts\Manage-LightsailProxy.ps1
 ```
 
 切换脚本会用方向键菜单选择目标区域，东京默认排在第一位。选择预设区域后会显示默认值，按 Enter 接受或输入新值覆盖。它会删除当前 `.env.local` 指向的实例，切换配置到目标区域，确保目标区域 Lightsail key pair 存在并回写 `SSH_KEY_NAME`，创建新节点，执行直连和服务端验证，生成客户端 URL，并在终端打印 v2rayN 可导入的 VLESS URL。
@@ -71,10 +71,10 @@ output/v2rayn-routing-bundle.json
 output/v2rayn-routing-notes.txt
 ```
 
-关闭 v2rayN 后，可以从统一入口应用推荐设置：
+关闭 v2rayN 后，运行统一入口并选择 `Apply recommended v2rayN routing`：
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting
+.\scripts\Manage-LightsailProxy.ps1
 ```
 
 ## Bash 兼容入口

@@ -48,18 +48,18 @@ SSH_ALLOWED_CIDR=<your-public-ip>/32
 ## 3. 生成代理协议密钥
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action GenerateSecrets
+.\scripts\Manage-LightsailProxy.ps1
 ```
 
-脚本会写入 `secrets.local.env`。如果本机没有 `xray.exe`，可以在可信环境运行 `xray uuid`、`xray x25519`、`openssl rand -hex 8` 后手动填写。
+在菜单中选择 `Generate or repair local proxy secrets`。脚本会写入 `secrets.local.env`。如果本机没有 `xray.exe`，可以在可信环境运行 `xray uuid`、`xray x25519`、`openssl rand -hex 8` 后手动填写。
 
 ## 4. 创建 Lightsail 节点
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action Create
+.\scripts\Manage-LightsailProxy.ps1
 ```
 
-脚本会完成：
+在菜单中选择 `Create node from current .env.local`。脚本会完成：
 
 1. 渲染 `output/cloud-init.sh`。
 2. 创建 Lightsail Ubuntu 实例。
@@ -79,8 +79,10 @@ output/subscription.txt
 先在本机检查云侧和端口：
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action Test
+.\scripts\Manage-LightsailProxy.ps1
 ```
+
+在菜单中选择 `Test current node connectivity`。
 
 如果需要登录服务器：
 
@@ -110,10 +112,10 @@ Windows 首选 v2rayN：
 关闭 v2rayN 后，可以应用推荐设置：
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action ApplyV2rayNRouting
+.\scripts\Manage-LightsailProxy.ps1
 ```
 
-统一入口会维护推荐路由/TUN 设置；需要指定 `-ProfileAddress` 等高级参数时，可直接调用 `scripts/actions/Set-V2rayNRecommendedRouting.ps1`。
+在菜单中选择 `Apply recommended v2rayN routing`。统一入口会维护推荐路由/TUN 设置；需要指定 `-ProfileAddress` 等高级参数时，才直接调用 `scripts/actions/Set-V2rayNRecommendedRouting.ps1`。
 
 ## Bash 路径
 

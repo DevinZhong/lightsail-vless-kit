@@ -44,7 +44,9 @@ Copy-Item secrets.example.env secrets.local.env
 .\scripts\Manage-LightsailProxy.ps1
 ```
 
-常用动作也可以直接指定：
+按菜单提示选择创建、检查、重建、换区或 v2rayN 路由设置即可；日常不需要记忆任何 `-Action` 参数。
+
+如需自动化、排障或从其他脚本调用，才直接指定动作：
 
 ```powershell
 .\scripts\Manage-LightsailProxy.ps1 -Action SwitchRegion
@@ -65,12 +67,10 @@ output/subscription.txt
 
 节点不可用、IP 声誉异常或想换区域时，见 [docs/rebuild-and-delete.md](docs/rebuild-and-delete.md)。
 
-常用动作：
+从统一入口的菜单选择 `Rebuild current-region node`、`Delete current node` 或 `Switch region / rebuild node`：
 
 ```powershell
-.\scripts\Manage-LightsailProxy.ps1 -Action Rebuild
-.\scripts\Manage-LightsailProxy.ps1 -Action Delete
-.\scripts\Manage-LightsailProxy.ps1 -Action SwitchRegion
+.\scripts\Manage-LightsailProxy.ps1
 ```
 
 重建或切换区域后 IP 和客户端 URL 会变化，需要重新导入 v2rayN。
