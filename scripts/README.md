@@ -99,3 +99,13 @@ Bash 脚本移到了 `scripts/bash/`，保留给 Linux/macOS/WSL 复用：
 - 二维码或完整客户端导出配置
 
 `output/` 下的渲染结果包含代理连接凭据，只能本地使用，不提交。
+
+## 维护者验证
+
+发布前运行：
+
+```powershell
+.\scripts\Validate-Repository.ps1
+```
+
+它会解析全部 PowerShell 脚本，并用脱敏测试值验证 JSON 和 cloud-init 模板渲染结果。GitHub Actions 也会执行同一检查以及 Bash 语法检查。

@@ -4,6 +4,8 @@
 
 目标是用本地脚本快速创建 AWS Lightsail Ubuntu 节点，通过 cloud-init 自动部署 Xray-core VLESS Reality TCP 443。Windows 客户端首选 v2rayN，重建后手动导入本地生成的节点 URL。
 
+这是给有 AWS 与命令行基础的个人用户使用的脚本模板，不是机场面板、多用户服务或远程订阅服务。云资源费用、合规责任和对目标服务条款的遵守均由使用者自行承担；本项目不承诺匿名性、可用性，也不用于规避任何限制。
+
 ## 当前定位
 
 - 云厂商：AWS Lightsail Global
@@ -11,6 +13,7 @@
 - 默认系统：Ubuntu 24.04 LTS / `ubuntu_24_04`
 - 默认套餐：Linux $5/月档 / `nano_3_0`
 - 主协议：Xray-core VLESS Reality Vision TCP 443
+- 默认 Xray 版本：固定在 `.env.example`；部署时校验上游同版本 SHA-256 摘要
 - 客户端：Windows v2rayN 首选
 - 订阅策略：不维护远程固定订阅地址；每次重建生成本地 URL，手动导入客户端
 
@@ -88,6 +91,7 @@ output/subscription.txt
 | [docs/client-config-template.md](docs/client-config-template.md) | 客户端配置记录模板 |
 | [docs/test-record-template.md](docs/test-record-template.md) | 测试记录模板 |
 | [docs/open-source-review.md](docs/open-source-review.md) | 开源复用价值和开源前检查 |
+| [docs/releasing.md](docs/releasing.md) | 维护者发布清单 |
 
 历史参考：
 
@@ -121,8 +125,12 @@ scripts/bash/delete-lightsail.sh
 - 默认不使用 Static IP，因为“IP 不行就快速重建”的模式更适合新 IP。
 - 不维护远程固定订阅地址，重建频率低时手动导入本地 URL 更简单。
 
+## 许可证与安全
+
+本项目以 [MIT License](LICENSE) 发布。安全问题请遵循 [SECURITY.md](SECURITY.md)，不要在公开 issue、截图或日志中提交任何连接凭据。
+
 ## 开源复用判断
 
 这个项目有开源复用价值，适合定位为“个人固定出口节点的可审计脚本模板”。它不适合包装成大众一键面板，也不适合多用户售卖场景。
 
-开源前建议先补 `LICENSE`、安全免责声明，并确认没有真实 `.env.local`、`secrets.local.env`、`output/`、v2rayN 数据库备份或完整节点 URI 被提交。详细评估见 [docs/open-source-review.md](docs/open-source-review.md)。
+项目当前适合作为个人固定出口脚本模板开源；发布操作请按 [docs/releasing.md](docs/releasing.md) 执行。详细评估见 [docs/open-source-review.md](docs/open-source-review.md)。

@@ -73,7 +73,7 @@ if ($RequireTcp -and -not $tcpResults[443]) { $failed = $true }
 if ($SshCheck -and $tcpResults[22]) {
   Write-Host ''
   Write-Info 'Checking server-side Xray status over SSH...'
-  Require-Config $config @('SSH_KEY_NAME', 'VLESS_UUID', 'REALITY_SHORT_ID', 'REALITY_SERVER_NAME', 'REALITY_DEST')
+  Require-Config $config @('SSH_KEY_NAME')
   $keyPath = Join-Path $env:USERPROFILE ".ssh\$($config['SSH_KEY_NAME']).pem"
   if (-not (Test-Path -LiteralPath $keyPath)) {
     Write-Warn "SSH key file not found: $keyPath"
@@ -82,10 +82,11 @@ if ($SshCheck -and $tcpResults[22]) {
     $remoteCommand = @(
       'printf ''XRAY_ACTIVE=%s\n'' "$(systemctl is-active xray 2>/dev/null || true)"',
       'printf ''LISTEN_443=%s\n'' "$(sudo ss -lntp 2>/dev/null | grep -c '':443'')"',
-      'printf ''UUID=''; sudo jq -r ''.inbounds[0].settings.clients[0].id'' /usr/local/etc/xray/config.json',
-      'printf ''SNI=''; sudo jq -r ''.inbounds[0].streamSettings.realitySettings.serverNames[0]'' /usr/local/etc/xray/config.json',
-      'printf ''SHORT_ID=''; sudo jq -r ''.inbounds[0].streamSettings.realitySettings.shortIds[0]'' /usr/local/etc/xray/config.json',
-      'printf ''DEST=''; sudo jq -r ''.inbounds[0].streamSettings.realitySettings.dest'' /usr/local/etc/xray/config.json'
+      'sudo jq -e ''.inbounds[0].settings.clients[0].id | strings | select(length > 0)'' /usr/local/etc/xray/config.json >/dev/null && printf ''UUID_SET=true\n'' || printf ''UUID_SET=false\n''',
+      'sudo jq -e ''.inbounds[0].streamSettings.realitySettings.privateKey | strings | select(length > 0)'' /usr/local/etc/xray/config.json >/dev/null && printf ''REALITY_PRIVATE_KEY_SET=true\n'' || printf ''REALITY_PRIVATE_KEY_SET=false\n''',
+      'sudo jq -e ''.inbounds[0].streamSettings.realitySettings.shortIds[0] | strings | select(length > 0)'' /usr/local/etc/xray/config.json >/dev/null && printf ''SHORT_ID_SET=true\n'' || printf ''SHORT_ID_SET=false\n''',
+      'sudo jq -e ''.inbounds[0].streamSettings.realitySettings.serverNames[0] | strings | select(length > 0)'' /usr/local/etc/xray/config.json >/dev/null && printf ''SNI_SET=true\n'' || printf ''SNI_SET=false\n''',
+      'sudo jq -e ''.inbounds[0].streamSettings.realitySettings.dest | strings | select(length > 0)'' /usr/local/etc/xray/config.json >/dev/null && printf ''DEST_SET=true\n'' || printf ''DEST_SET=false\n'''
     ) -join '; '
     $sshArgs = @('-o','BatchMode=yes','-o','StrictHostKeyChecking=accept-new','-i',$keyPath,"ubuntu@$ip",$remoteCommand)
     $remoteOutput = & ssh @sshArgs 2>&1
@@ -105,10 +106,11 @@ if ($SshCheck -and $tcpResults[22]) {
       $checks = [ordered]@{
         'xray active' = ($remote.ContainsKey('XRAY_ACTIVE') -and $remote['XRAY_ACTIVE'] -eq 'active')
         'listening 443' = ($listenCount -gt 0)
-        'uuid matches' = ($remote.ContainsKey('UUID') -and $remote['UUID'] -eq [string]$config['VLESS_UUID'])
-        'sni matches' = ($remote.ContainsKey('SNI') -and $remote['SNI'] -eq [string]$config['REALITY_SERVER_NAME'])
-        'short id matches' = ($remote.ContainsKey('SHORT_ID') -and $remote['SHORT_ID'] -eq [string]$config['REALITY_SHORT_ID'])
-        'dest matches' = ($remote.ContainsKey('DEST') -and $remote['DEST'] -eq [string]$config['REALITY_DEST'])
+        'uuid configured' = ($remote.ContainsKey('UUID_SET') -and $remote['UUID_SET'] -eq 'true')
+        'Reality private key configured' = ($remote.ContainsKey('REALITY_PRIVATE_KEY_SET') -and $remote['REALITY_PRIVATE_KEY_SET'] -eq 'true')
+        'short id configured' = ($remote.ContainsKey('SHORT_ID_SET') -and $remote['SHORT_ID_SET'] -eq 'true')
+        'sni configured' = ($remote.ContainsKey('SNI_SET') -and $remote['SNI_SET'] -eq 'true')
+        'dest configured' = ($remote.ContainsKey('DEST_SET') -and $remote['DEST_SET'] -eq 'true')
       }
       foreach ($name in $checks.Keys) {
         $status = if ($checks[$name]) { 'OK' } else { 'FAILED' }

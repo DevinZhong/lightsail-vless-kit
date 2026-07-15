@@ -23,11 +23,6 @@ arch_xray() {
   esac
 }
 
-latest_github_tag() {
-  local repo="$1"
-  curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" | jq -r '.tag_name'
-}
-
 install_base() {
   log "Installing base packages..."
   apt-get update
@@ -36,15 +31,21 @@ install_base() {
 
 install_xray() {
   local version="$XRAY_VERSION"
-  local asset_arch
+  local asset_arch asset_name checksum_url expected_sha actual_sha
   asset_arch="$(arch_xray)"
-  if [[ -z "$version" ]]; then
-    version="$(latest_github_tag XTLS/Xray-core | sed 's/^v//')"
-  fi
+  [[ -n "$version" ]] || fatal 'XRAY_VERSION must be pinned to an explicit version.'
   log "Installing Xray-core v${version}..."
   tmpdir="$(mktemp -d)"
-  url="https://github.com/XTLS/Xray-core/releases/download/v${version}/Xray-linux-${asset_arch}.zip"
+  asset_name="Xray-linux-${asset_arch}.zip"
+  url="https://github.com/XTLS/Xray-core/releases/download/v${version}/${asset_name}"
+  checksum_url="${url}.dgst"
   curl -fL "$url" -o "$tmpdir/xray.zip"
+  curl -fL "$checksum_url" -o "$tmpdir/xray.zip.dgst"
+  expected_sha="$(grep -Eio '[a-f0-9]{64}' "$tmpdir/xray.zip.dgst" | head -n 1 | tr '[:upper:]' '[:lower:]' || true)"
+  [[ -n "$expected_sha" ]] || fatal "Could not parse SHA-256 from $checksum_url"
+  actual_sha="$(sha256sum "$tmpdir/xray.zip" | awk '{print $1}')"
+  [[ "$actual_sha" == "$expected_sha" ]] || fatal 'Xray release checksum verification failed.'
+  log 'Xray release checksum verified.'
   unzip -q "$tmpdir/xray.zip" -d "$tmpdir/xray"
   install -m 0755 "$tmpdir/xray/xray" /usr/local/bin/xray
   mkdir -p /usr/local/share/xray /usr/local/etc/xray /var/log/xray

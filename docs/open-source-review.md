@@ -23,22 +23,21 @@
 - 多用户售卖或共享节点场景。
 - 需要 Web 面板、流量统计、账号管理、自动订阅发布的人。
 
-## 开源前建议
+## 当前发布门槛
 
 必须做：
 
-- 删除或避免提交 `.env.local`、`secrets.local.env`、`output/` 内容。
-- 清理文档和脚本里的个人 IP、实例名、路径和节点名称。
-- 明确写出使用者需要自行遵守当地法律、云厂商条款和目标服务条款。
-- 增加 `LICENSE`，建议用 MIT 或 Apache-2.0。
-- 增加安全说明，例如 `SECURITY.md` 或 README 中的安全边界章节。
+- 确认 `.env.local`、`secrets.local.env`、`output/` 内容没有被暂存或提交。
+- 用新 clone 和隔离 AWS 测试资源跑通一次主流程，然后删除测试实例。
+- 保持 Xray 版本固定，并验证上游 release 的 `.dgst` 校验文件；不要在部署时自动使用 latest。
+- 运行 `scripts/Validate-Repository.ps1`，并在 Bash 环境做语法检查。
+- 启用 GitHub private vulnerability reporting，并按 [releasing.md](releasing.md) 完成发布检查。
 
 建议做：
 
 - 把 PowerShell 标为主路径，Bash 标为兼容路径。
-- 给脚本做一次 `shellcheck` / `PSScriptAnalyzer` 检查。
-- 给模板渲染增加最小自动测试，确保不会留下 `{{TOKEN}}`。
-- 在 README 顶部加“不会替用户购买或规避服务限制”的免责声明。
+- 只在真实的兼容性需求出现后，再增加 ShellCheck 或 PSScriptAnalyzer；基础语法和模板检查已经在 CI 中覆盖。
+- 为每次 Xray 升级保留脱敏测试记录。
 
 ## 不建议开源的内容
 
