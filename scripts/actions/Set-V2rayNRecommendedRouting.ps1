@@ -122,7 +122,7 @@ def rule(remarks, outbound, domains=None, ips=None, port=None, network=None, pro
     return item
 
 managed_rules = [
-    rule("[personal-fixed-exit] AI strict proxy", "proxy", domains=[
+    rule("[lightsail-vless-kit] AI strict proxy", "proxy", domains=[
         "domain:openai.com",
         "domain:chatgpt.com",
         "domain:oaistatic.com",
@@ -132,7 +132,7 @@ managed_rules = [
         "domain:claude.ai",
         "domain:perplexity.ai",
     ]),
-    rule("[personal-fixed-exit] Google strict proxy", "proxy", domains=[
+    rule("[lightsail-vless-kit] Google strict proxy", "proxy", domains=[
         "geosite:google",
         "domain:google.com",
         "domain:gstatic.com",
@@ -141,13 +141,13 @@ managed_rules = [
         "domain:youtube.com",
         "domain:ytimg.com",
     ]),
-    rule("[personal-fixed-exit] GitHub strict proxy", "proxy", domains=[
+    rule("[lightsail-vless-kit] GitHub strict proxy", "proxy", domains=[
         "domain:github.com",
         "domain:githubusercontent.com",
         "domain:githubassets.com",
         "domain:ghcr.io",
     ]),
-    rule("[personal-fixed-exit] Developer registries proxy", "proxy", domains=[
+    rule("[lightsail-vless-kit] Developer registries proxy", "proxy", domains=[
         "domain:npmjs.org",
         "domain:npmjs.com",
         "domain:registry.npmjs.org",
@@ -218,7 +218,8 @@ def update_db(path):
         if active:
             rid, remarks, ruleset, _ = active
             rules = json.loads(ruleset or "[]")
-            rules = [r for r in rules if not str(r.get("Remarks", "")).startswith("[personal-fixed-exit]")]
+            managed_prefixes = ("[personal-fixed-exit]", "[lightsail-vless-kit]")
+            rules = [r for r in rules if not str(r.get("Remarks", "")).startswith(managed_prefixes)]
             insert_at = 0
             if rules and rules[0].get("Network") == "udp" and str(rules[0].get("Port")) == "443":
                 insert_at = 1

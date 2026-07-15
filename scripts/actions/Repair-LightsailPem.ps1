@@ -1,5 +1,5 @@
 param(
-  [string]$KeyPath = "$env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pem"
+  [string]$KeyPath = "$env:USERPROFILE\.ssh\lightsail-vless-kit-lightsail.pem"
 )
 
 Set-StrictMode -Version Latest
@@ -50,4 +50,4 @@ try {
 
 Write-Host "Reformatted PEM: $KeyPath"
 Write-Host "Line count: $($lines.Count)"
-Write-Host 'Now verify with: ssh-keygen -y -f "$env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pem"'
+Write-Host 'Now verify with: ssh-keygen -y -f "$env:USERPROFILE\.ssh\lightsail-vless-kit-lightsail.pem"'

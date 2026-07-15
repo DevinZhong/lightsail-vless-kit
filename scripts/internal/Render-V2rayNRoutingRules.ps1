@@ -27,8 +27,8 @@ function New-Rule {
 }
 
 $rules = @(
-  New-Rule -Id '1000000000000000001' -Remarks '[personal-fixed-exit] Block QUIC UDP 443' -OutboundTag 'block' -Port '443' -Network 'udp'
-  New-Rule -Id '1000000000000000002' -Remarks '[personal-fixed-exit] AI strict proxy' -OutboundTag 'proxy' -Domain @(
+  New-Rule -Id '1000000000000000001' -Remarks '[lightsail-vless-kit] Block QUIC UDP 443' -OutboundTag 'block' -Port '443' -Network 'udp'
+  New-Rule -Id '1000000000000000002' -Remarks '[lightsail-vless-kit] AI strict proxy' -OutboundTag 'proxy' -Domain @(
     'domain:openai.com',
     'domain:chatgpt.com',
     'domain:oaistatic.com',
@@ -38,7 +38,7 @@ $rules = @(
     'domain:claude.ai',
     'domain:perplexity.ai'
   )
-  New-Rule -Id '1000000000000000003' -Remarks '[personal-fixed-exit] Google strict proxy' -OutboundTag 'proxy' -Domain @(
+  New-Rule -Id '1000000000000000003' -Remarks '[lightsail-vless-kit] Google strict proxy' -OutboundTag 'proxy' -Domain @(
     'geosite:google',
     'domain:google.com',
     'domain:gstatic.com',
@@ -47,13 +47,13 @@ $rules = @(
     'domain:youtube.com',
     'domain:ytimg.com'
   )
-  New-Rule -Id '1000000000000000004' -Remarks '[personal-fixed-exit] GitHub strict proxy' -OutboundTag 'proxy' -Domain @(
+  New-Rule -Id '1000000000000000004' -Remarks '[lightsail-vless-kit] GitHub strict proxy' -OutboundTag 'proxy' -Domain @(
     'domain:github.com',
     'domain:githubusercontent.com',
     'domain:githubassets.com',
     'domain:ghcr.io'
   )
-  New-Rule -Id '1000000000000000005' -Remarks '[personal-fixed-exit] Developer registries proxy' -OutboundTag 'proxy' -Domain @(
+  New-Rule -Id '1000000000000000005' -Remarks '[lightsail-vless-kit] Developer registries proxy' -OutboundTag 'proxy' -Domain @(
     'domain:npmjs.org',
     'domain:npmjs.com',
     'domain:registry.npmjs.org',
@@ -61,8 +61,8 @@ $rules = @(
     'domain:pythonhosted.org',
     'domain:files.pythonhosted.org'
   )
-  New-Rule -Id '1000000000000000006' -Remarks '[personal-fixed-exit] Private direct' -OutboundTag 'direct' -Domain @('geosite:private') -Ip @('geoip:private')
-  New-Rule -Id '1000000000000000007' -Remarks '[personal-fixed-exit] China direct' -OutboundTag 'direct' -Domain @('geosite:cn') -Ip @('geoip:cn')
+  New-Rule -Id '1000000000000000006' -Remarks '[lightsail-vless-kit] Private direct' -OutboundTag 'direct' -Domain @('geosite:private') -Ip @('geoip:private')
+  New-Rule -Id '1000000000000000007' -Remarks '[lightsail-vless-kit] China direct' -OutboundTag 'direct' -Domain @('geosite:cn') -Ip @('geoip:cn')
 )
 
 $rulesPath = Join-Path $Script:OutputDir 'v2rayn-routing-rules.json'
@@ -72,7 +72,7 @@ $notesPath = Join-Path $Script:OutputDir 'v2rayn-routing-notes.txt'
 Save-TextFileNoBom $rulesPath (($rules | ConvertTo-Json -Depth 20) + "`n")
 
 $bundle = [ordered]@{
-  remarks = 'personal-fixed-exit recommended routing'
+  remarks = 'lightsail-vless-kit recommended routing'
   domainStrategy = 'AsIs'
   defaultOutbound = 'proxy'
   rules = $rules

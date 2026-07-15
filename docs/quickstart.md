@@ -18,7 +18,7 @@ Windows 推荐用 PowerShell：
 
 ```powershell
 aws --version
-aws sts get-caller-identity --profile personal-fixed-exit
+aws sts get-caller-identity --profile lightsail-vless-kit
 ```
 
 ## 2. 初始化本地配置
@@ -38,8 +38,8 @@ AWS_AZ=ap-northeast-1a
 LIGHTSAIL_INSTANCE_NAME=proxy-tokyo-01
 LIGHTSAIL_BUNDLE_ID=nano_3_0
 LIGHTSAIL_BLUEPRINT_ID=ubuntu_24_04
-AWS_PROFILE=personal-fixed-exit
-SSH_KEY_NAME=personal-fixed-exit-lightsail
+AWS_PROFILE=lightsail-vless-kit
+SSH_KEY_NAME=lightsail-vless-kit-lightsail
 SSH_ALLOWED_CIDR=<your-public-ip>/32
 ```
 
@@ -87,7 +87,7 @@ output/subscription.txt
 如果需要登录服务器：
 
 ```powershell
-ssh -i $env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pem ubuntu@<server-ip>
+ssh -i $env:USERPROFILE\.ssh\lightsail-vless-kit-lightsail.pem ubuntu@<server-ip>
 ```
 
 服务器上常用检查：

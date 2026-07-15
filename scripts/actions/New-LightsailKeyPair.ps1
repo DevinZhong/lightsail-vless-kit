@@ -18,7 +18,11 @@ if ([string]::IsNullOrWhiteSpace($Region)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($KeyPairName)) {
-  $KeyPairName = "personal-fixed-exit-lightsail-$Region"
+  if ($config.ContainsKey('SSH_KEY_NAME') -and -not [string]::IsNullOrWhiteSpace([string]$config['SSH_KEY_NAME'])) {
+    $KeyPairName = [string]$config['SSH_KEY_NAME']
+  } else {
+    $KeyPairName = "lightsail-vless-kit-lightsail-$Region"
+  }
 }
 
 if ([string]::IsNullOrWhiteSpace($KeyPath)) {

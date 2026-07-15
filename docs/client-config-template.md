@@ -35,7 +35,7 @@
 
 ```yaml
 proxy-groups:
-  - name: Fixed-Exit
+  - name: Lightsail-VLESS
     type: select
     proxies:
       - <your-redacted-node-name>
@@ -45,7 +45,7 @@ proxy-groups:
     type: select
     proxies:
       - DIRECT
-      - Fixed-Exit
+      - Lightsail-VLESS
 ```
 
 ## 常用域名规则
@@ -55,29 +55,29 @@ proxy-groups:
 ```yaml
 rules:
   # OpenAI / ChatGPT / Codex
-  - DOMAIN-SUFFIX,openai.com,Fixed-Exit
-  - DOMAIN-SUFFIX,chatgpt.com,Fixed-Exit
-  - DOMAIN-SUFFIX,oaistatic.com,Fixed-Exit
-  - DOMAIN-SUFFIX,oaiusercontent.com,Fixed-Exit
-  - DOMAIN-SUFFIX,auth0.com,Fixed-Exit
+  - DOMAIN-SUFFIX,openai.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,chatgpt.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,oaistatic.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,oaiusercontent.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,auth0.com,Lightsail-VLESS
 
   # GitHub
-  - DOMAIN-SUFFIX,github.com,Fixed-Exit
-  - DOMAIN-SUFFIX,githubusercontent.com,Fixed-Exit
-  - DOMAIN-SUFFIX,githubassets.com,Fixed-Exit
-  - DOMAIN-SUFFIX,ghcr.io,Fixed-Exit
+  - DOMAIN-SUFFIX,github.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,githubusercontent.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,githubassets.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,ghcr.io,Lightsail-VLESS
 
   # Google
-  - DOMAIN-SUFFIX,google.com,Fixed-Exit
-  - DOMAIN-SUFFIX,gstatic.com,Fixed-Exit
-  - DOMAIN-SUFFIX,googleapis.com,Fixed-Exit
-  - DOMAIN-SUFFIX,googleusercontent.com,Fixed-Exit
+  - DOMAIN-SUFFIX,google.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,gstatic.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,googleapis.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,googleusercontent.com,Lightsail-VLESS
 
   # Development
-  - DOMAIN-SUFFIX,npmjs.org,Fixed-Exit
-  - DOMAIN-SUFFIX,npmjs.com,Fixed-Exit
-  - DOMAIN-SUFFIX,pypi.org,Fixed-Exit
-  - DOMAIN-SUFFIX,pythonhosted.org,Fixed-Exit
+  - DOMAIN-SUFFIX,npmjs.org,Lightsail-VLESS
+  - DOMAIN-SUFFIX,npmjs.com,Lightsail-VLESS
+  - DOMAIN-SUFFIX,pypi.org,Lightsail-VLESS
+  - DOMAIN-SUFFIX,pythonhosted.org,Lightsail-VLESS
 
   # Default
   - MATCH,Final

@@ -1,6 +1,6 @@
-# personal-fixed-exit
+# lightsail-vless-kit
 
-低成本、低维护、可重复重建的个人固定外网出口环境项目。
+AWS Lightsail 上部署、验证和重建 Xray VLESS Reality 节点的脚本工具包。
 
 目标是用本地脚本快速创建 AWS Lightsail Ubuntu 节点，通过 cloud-init 自动部署 Xray-core VLESS Reality TCP 443。Windows 客户端首选 v2rayN，重建后手动导入本地生成的节点 URL。
 

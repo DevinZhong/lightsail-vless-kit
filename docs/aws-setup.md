@@ -72,19 +72,19 @@ JSON：
 本地配置：
 
 ```powershell
-aws configure --profile personal-fixed-exit
+aws configure --profile lightsail-vless-kit
 ```
 
 验证：
 
 ```powershell
-aws sts get-caller-identity --profile personal-fixed-exit
+aws sts get-caller-identity --profile lightsail-vless-kit
 ```
 
 项目 `.env.local` 使用：
 
 ```bash
-AWS_PROFILE=personal-fixed-exit
+AWS_PROFILE=lightsail-vless-kit
 AWS_REGION=ap-northeast-1
 AWS_AZ=ap-northeast-1a
 ```
@@ -95,15 +95,15 @@ AWS_AZ=ap-northeast-1a
 
 ```powershell
 $keyBase64 = aws lightsail create-key-pair `
-  --profile personal-fixed-exit `
+  --profile lightsail-vless-kit `
   --region ap-northeast-1 `
-  --key-pair-name personal-fixed-exit-lightsail `
+  --key-pair-name lightsail-vless-kit-lightsail `
   --query 'privateKeyBase64' `
   --output text
 
 # AWS CLI returns a PEM private key text here, despite the field name privateKeyBase64.
 # Save it as-is. Do not base64-decode it.
-$keyPath = "$env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pem"
+$keyPath = "$env:USERPROFILE\.ssh\lightsail-vless-kit-lightsail.pem"
 Set-Content -Path $keyPath -Value $keyBase64 -NoNewline
 ```
 
@@ -111,20 +111,20 @@ Set-Content -Path $keyPath -Value $keyBase64 -NoNewline
 
 ```powershell
 aws lightsail get-key-pairs `
-  --profile personal-fixed-exit `
+  --profile lightsail-vless-kit `
   --region ap-northeast-1
 ```
 
 然后在 `.env.local` 中设置：
 
 ```bash
-SSH_KEY_NAME=personal-fixed-exit-lightsail
+SSH_KEY_NAME=lightsail-vless-kit-lightsail
 ```
 
 之后 SSH 连接使用：
 
 ```powershell
-ssh -i $env:USERPROFILE\.ssh\personal-fixed-exit-lightsail.pem ubuntu@服务器IP
+ssh -i $env:USERPROFILE\.ssh\lightsail-vless-kit-lightsail.pem ubuntu@服务器IP
 ```
 
 如果你已经创建过同名 key pair，`create-key-pair` 会失败。可以换一个 key pair 名称，或确认不用后删除旧 key pair。

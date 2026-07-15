@@ -4,7 +4,7 @@ if [ -z "${BASH_VERSION:-}" ]; then
 fi
 set -euo pipefail
 
-# Cloud-init bootstrap for personal fixed-exit node.
+# Cloud-init bootstrap for a Lightsail VLESS node.
 # This rendered file contains proxy secrets. Do not commit rendered output.
 
 exec > >(tee -a /var/log/proxy-bootstrap.log) 2>&1
