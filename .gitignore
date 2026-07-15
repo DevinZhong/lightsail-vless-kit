@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+.lightsail-vless-kit.user.json
 secrets.local.env
 secrets.env
 *.key

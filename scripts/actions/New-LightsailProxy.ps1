@@ -4,6 +4,16 @@ $config = Get-LocalConfig
 Require-Config $config @('AWS_REGION', 'AWS_AZ', 'LIGHTSAIL_INSTANCE_NAME', 'LIGHTSAIL_BUNDLE_ID', 'LIGHTSAIL_BLUEPRINT_ID')
 Require-Config $config @('VLESS_UUID', 'REALITY_PRIVATE_KEY', 'REALITY_PUBLIC_KEY', 'REALITY_SHORT_ID')
 
+Write-Info 'Ensuring the configured Lightsail SSH key pair is available locally...'
+& "$PSScriptRoot\New-LightsailKeyPair.ps1"
+if ($LASTEXITCODE -ne 0) { Die 'Lightsail SSH key pair preparation failed.' }
+$config = Get-LocalConfig
+Require-Config $config @('SSH_KEY_NAME')
+$keyPath = Join-Path $env:USERPROFILE ".ssh\$($config['SSH_KEY_NAME']).pem"
+if (-not (Test-Path -LiteralPath $keyPath)) {
+  Die "Local SSH key is unavailable: $keyPath. Do not recreate an existing key pair unless no instance uses it."
+}
+
 try {
   $existing = Invoke-Aws $config lightsail get-instance `
     --instance-name ([string]$config['LIGHTSAIL_INSTANCE_NAME']) `

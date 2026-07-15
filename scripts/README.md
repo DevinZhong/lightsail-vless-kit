@@ -6,7 +6,7 @@
 .\scripts\Manage-LightsailProxy.ps1
 ```
 
-`Manage-LightsailProxy.ps1` 会显示交互菜单。日常只运行这一条命令并按提示选择即可，包括区域切换、创建、重建、删除、连通性测试、v2rayN 路由设置、v2rayN core 测试、key pair 准备、PEM 修复和节点直连路由。
+`Manage-LightsailProxy.ps1` 会显示交互菜单。首次运行选择语言后，结果会保存到本地 ignored 文件 `.lightsail-vless-kit.user.json`；可从菜单随时切换。日常只运行这一条命令并按提示选择即可，包括环境预检、区域切换、创建、重建、删除、连通性测试、v2rayN 路由设置、v2rayN core 测试、key pair 准备、PEM 修复和节点直连路由。
 
 只有自动化、排障或已明确知道目标动作时，才直接指定动作：
 
@@ -29,6 +29,7 @@
 
 | Action | 作用 |
 | --- | --- |
+| `Preflight` | 检查本地配置文件、AWS CLI、AWS 登录态和密钥生成条件；首次使用优先运行 |
 | `SwitchRegion` | 选择目标区域，删除当前实例并创建目标区域节点；东京默认排第一 |
 | `Test` | 检查当前实例、TCP 22/443、服务端 Xray/Reality 配置 |
 | `Create` | 使用当前 `.env.local` 创建节点 |
@@ -41,6 +42,7 @@
 | `GenerateSecrets` | 生成或补齐本地代理协议密钥 |
 | `EnsureKeyPair` | 确保当前区域 Lightsail key pair 存在，并回写 `SSH_KEY_NAME` |
 | `RepairPem` | 修复本地 PEM 私钥换行格式 |
+| `SetLanguage` | 切换菜单界面语言；也可用入口的 `-Language zh-CN/en-US` 指定 |
 
 ## 本地配置文件
 
@@ -79,7 +81,7 @@ output/v2rayn-routing-notes.txt
 
 ## Bash 兼容入口
 
-Bash 脚本移到了 `scripts/bash/`，保留给 Linux/macOS/WSL 复用：
+Bash 脚本移到了 `scripts/bash/`，作为 Linux/macOS/WSL 的实验性兼容入口：
 
 ```bash
 ./scripts/bash/generate-secrets.sh

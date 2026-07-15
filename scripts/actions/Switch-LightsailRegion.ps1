@@ -401,9 +401,7 @@ if (Test-Path -LiteralPath $urlPath) {
 Write-Host ''
 Write-Host 'Switch complete.' -ForegroundColor Green
 Write-Host ''
-Write-Host 'Import this URL into v2rayN:' -ForegroundColor Cyan
-Write-Host $url
-Write-Host ''
+Write-Host 'Client credentials were written to local output files and are not printed to the terminal.' -ForegroundColor Cyan
 Write-Host 'Generated files:'
 Write-Host "  $urlPath"
 Write-Host "  $subPath"

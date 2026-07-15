@@ -1,10 +1,16 @@
 param(
-  [ValidateSet('', 'SwitchRegion', 'Create', 'Rebuild', 'Delete', 'Test', 'AddBypassRoute', 'RemoveBypassRoute', 'ApplyV2rayNRouting', 'TestV2rayNCore', 'GenerateSecrets', 'EnsureKeyPair', 'RepairPem', 'Exit')]
-  [string]$Action = ''
+  [ValidateSet('', 'Preflight', 'SwitchRegion', 'Create', 'Rebuild', 'Delete', 'Test', 'AddBypassRoute', 'RemoveBypassRoute', 'ApplyV2rayNRouting', 'TestV2rayNCore', 'GenerateSecrets', 'EnsureKeyPair', 'RepairPem', 'SetLanguage', 'Exit')]
+  [string]$Action = '',
+  [ValidateSet('zh-CN', 'en-US')][string]$Language = ''
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+. "$PSScriptRoot\internal\common.ps1"
+. "$PSScriptRoot\internal\ui.ps1"
+if (-not [string]::IsNullOrWhiteSpace($Language)) { Set-UiLanguage -Language $Language }
+$uiLanguage = Initialize-UiLanguage
 
 function Invoke-Script {
   param(
@@ -91,27 +97,20 @@ function Read-Choice {
   }
 }
 
-$actions = @(
-  [pscustomobject]@{ Value = 'SwitchRegion'; Label = 'Switch region / rebuild node' },
-  [pscustomobject]@{ Value = 'Test'; Label = 'Test current node connectivity' },
-  [pscustomobject]@{ Value = 'Create'; Label = 'Create node from current .env.local' },
-  [pscustomobject]@{ Value = 'Rebuild'; Label = 'Rebuild current-region node' },
-  [pscustomobject]@{ Value = 'Delete'; Label = 'Delete current node' },
-  [pscustomobject]@{ Value = 'AddBypassRoute'; Label = 'Add direct route for current node IP' },
-  [pscustomobject]@{ Value = 'RemoveBypassRoute'; Label = 'Remove direct route for current node IP' },
-  [pscustomobject]@{ Value = 'ApplyV2rayNRouting'; Label = 'Apply recommended v2rayN routing' },
-  [pscustomobject]@{ Value = 'TestV2rayNCore'; Label = 'Test local v2rayN core config' },
-  [pscustomobject]@{ Value = 'GenerateSecrets'; Label = 'Generate or repair local proxy secrets' },
-  [pscustomobject]@{ Value = 'EnsureKeyPair'; Label = 'Ensure Lightsail key pair for current region' },
-  [pscustomobject]@{ Value = 'RepairPem'; Label = 'Repair local PEM key formatting' },
-  [pscustomobject]@{ Value = 'Exit'; Label = 'Exit' }
-)
+$labels = if ($uiLanguage -eq 'zh-CN') {
+  @{ Preflight='环境预检（推荐首次运行）'; SwitchRegion='切换区域 / 重建节点'; Test='测试当前节点连通性'; Create='按当前 .env.local 创建节点'; Rebuild='重建当前区域节点'; Delete='删除当前节点'; AddBypassRoute='为当前节点 IP 添加直连路由'; RemoveBypassRoute='移除当前节点 IP 的直连路由'; ApplyV2rayNRouting='应用推荐 v2rayN 路由'; TestV2rayNCore='测试本地 v2rayN Core 配置'; GenerateSecrets='生成或修复本地代理密钥'; EnsureKeyPair='确保当前区域的 Lightsail 密钥对'; RepairPem='修复本地 PEM 密钥格式'; SetLanguage='切换界面语言 / Language'; Exit='退出' }
+} else {
+  @{ Preflight='Preflight checks (recommended first)'; SwitchRegion='Switch region / rebuild node'; Test='Test current node connectivity'; Create='Create node from current .env.local'; Rebuild='Rebuild current-region node'; Delete='Delete current node'; AddBypassRoute='Add direct route for current node IP'; RemoveBypassRoute='Remove direct route for current node IP'; ApplyV2rayNRouting='Apply recommended v2rayN routing'; TestV2rayNCore='Test local v2rayN core config'; GenerateSecrets='Generate or repair local proxy secrets'; EnsureKeyPair='Ensure Lightsail key pair for current region'; RepairPem='Repair local PEM key formatting'; SetLanguage='Switch interface language / 语言'; Exit='Exit' }
+}
+$actions = @('Preflight','SwitchRegion','Test','Create','Rebuild','Delete','AddBypassRoute','RemoveBypassRoute','ApplyV2rayNRouting','TestV2rayNCore','GenerateSecrets','EnsureKeyPair','RepairPem','SetLanguage','Exit') | ForEach-Object { [pscustomobject]@{ Value = $_; Label = $labels[$_] } }
 
 if ([string]::IsNullOrWhiteSpace($Action)) {
-  $Action = Read-Choice -Prompt 'Select Lightsail proxy action:' -Items $actions -DefaultIndex 0
+  $prompt = if ($uiLanguage -eq 'zh-CN') { '请选择 Lightsail 节点操作：' } else { 'Select Lightsail proxy action:' }
+  $Action = Read-Choice -Prompt $prompt -Items $actions -DefaultIndex 0
 }
 
 switch ($Action) {
+  'Preflight' { Invoke-Script 'Test-LightsailPreflight.ps1' }
   'SwitchRegion' { Invoke-Script 'Switch-LightsailRegion.ps1' }
   'Create' { Invoke-Script 'New-LightsailProxy.ps1' }
   'Rebuild' { Invoke-Script 'Rebuild-LightsailProxy.ps1' }
@@ -124,6 +123,10 @@ switch ($Action) {
   'GenerateSecrets' { Invoke-Script 'Generate-Secrets.ps1' }
   'EnsureKeyPair' { Invoke-Script 'New-LightsailKeyPair.ps1' }
   'RepairPem' { Invoke-Script 'Repair-LightsailPem.ps1' }
+  'SetLanguage' {
+    $answer = (Read-Host '1. 简体中文  2. English').Trim()
+    Set-UiLanguage -Language $(if ($answer -eq '2') { 'en-US' } else { 'zh-CN' })
+  }
   'Exit' { Write-Host 'Bye.' }
   default { throw "Unsupported action: $Action" }
 }

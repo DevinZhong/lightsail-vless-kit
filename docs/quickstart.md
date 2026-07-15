@@ -45,7 +45,15 @@ SSH_ALLOWED_CIDR=<your-public-ip>/32
 
 `SSH_ALLOWED_CIDR=0.0.0.0/0` 最省事，但不适合作为长期设置。能固定本机公网 IP 时，优先改成 `/32`。
 
-## 3. 生成代理协议密钥
+## 3. 首次启动并进行环境预检
+
+```powershell
+.\scripts\Manage-LightsailProxy.ps1
+```
+
+首次启动会询问界面语言；系统为中文时默认建议“简体中文”。选择 `环境预检（推荐首次运行）`，确认 `.env.local`、AWS CLI 登录态和必要部署参数都通过。语言选择仅保存在 `.lightsail-vless-kit.user.json`，与部署配置和凭据分离，也不会提交到 Git。
+
+## 4. 生成代理协议密钥
 
 ```powershell
 .\scripts\Manage-LightsailProxy.ps1
@@ -53,19 +61,20 @@ SSH_ALLOWED_CIDR=<your-public-ip>/32
 
 在菜单中选择 `Generate or repair local proxy secrets`。脚本会写入 `secrets.local.env`。如果本机没有 `xray.exe`，可以在可信环境运行 `xray uuid`、`xray x25519`、`openssl rand -hex 8` 后手动填写。
 
-## 4. 创建 Lightsail 节点
+## 5. 创建 Lightsail 节点
 
 ```powershell
 .\scripts\Manage-LightsailProxy.ps1
 ```
 
-在菜单中选择 `Create node from current .env.local`。脚本会完成：
+在菜单中选择“按当前 `.env.local` 创建节点”。脚本会完成：
 
-1. 渲染 `output/cloud-init.sh`。
-2. 创建 Lightsail Ubuntu 实例。
-3. 开放 SSH 和 TCP 443。
-4. 等待公网 IP 和 SSH。
-5. 渲染本地客户端导入文件。
+1. 确保当前区域的 Lightsail SSH key pair 与本机 PEM 都可用。
+2. 渲染 `output/cloud-init.sh`。
+3. 创建 Lightsail Ubuntu 实例。
+4. 开放 SSH 和 TCP 443。
+5. 等待公网 IP 和 SSH。
+6. 渲染本地客户端导入文件。
 
 生成的客户端文件在 `output/` 下，包含真实节点凭据，只能本机使用：
 
@@ -74,7 +83,7 @@ output/vless-reality-url.txt
 output/subscription.txt
 ```
 
-## 5. 验证服务端
+## 6. 验证服务端
 
 先在本机检查云侧和端口：
 
@@ -99,7 +108,7 @@ sudo tail -n 200 /var/log/proxy-bootstrap.log
 sudo ss -lntup
 ```
 
-## 6. 导入客户端
+## 7. 导入客户端
 
 Windows 首选 v2rayN：
 
@@ -128,4 +137,4 @@ cp secrets.example.env secrets.local.env
 ./scripts/bash/create-lightsail.sh
 ```
 
-当前项目主维护路径是 PowerShell，Bash 脚本用于 Linux/macOS/WSL 复用。
+当前项目主维护路径是 PowerShell。Bash 路径目前只完成语法 CI 检查，尚未完成 Linux/macOS 实机验证；请将其视作实验性兼容入口。

@@ -47,7 +47,9 @@ Copy-Item secrets.example.env secrets.local.env
 .\scripts\Manage-LightsailProxy.ps1
 ```
 
-按菜单提示选择创建、检查、重建、换区或 v2rayN 路由设置即可；日常不需要记忆任何 `-Action` 参数。
+首次运行会选择界面语言（默认建议跟随系统语言），选择结果保存在本地的 `.lightsail-vless-kit.user.json`，不提交到 Git。中文是默认维护语言；可随时从菜单的“切换界面语言 / Language”修改，或用 `-Language zh-CN` / `-Language en-US` 临时指定。
+
+首次使用先运行“环境预检”，再按菜单提示生成密钥、创建、检查、重建、换区或设置 v2rayN 路由；日常不需要记忆任何 `-Action` 参数。
 
 如需自动化、排障或从其他脚本调用，才直接指定动作：
 
@@ -64,7 +66,7 @@ output/vless-reality-url.txt
 output/subscription.txt
 ```
 
-这些文件都包含代理连接凭据，只能本机使用。
+这些文件都包含代理连接凭据，只能本机使用。完整 URL 默认不会打印到终端，避免被终端日志、录屏或截图意外收集。
 
 ## 重建和删除
 

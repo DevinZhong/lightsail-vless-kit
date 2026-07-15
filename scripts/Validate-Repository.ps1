@@ -41,6 +41,11 @@ if ($parseErrors) {
 $envExample = Get-Content -LiteralPath (Join-Path $repoRoot '.env.example') -Raw
 Assert-True ($envExample -match '(?m)^XRAY_VERSION=\d+\.\d+\.\d+$') '.env.example must pin XRAY_VERSION to an explicit release.'
 
+$menu = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\Manage-LightsailProxy.ps1') -Raw
+Assert-True ($menu -match "'Preflight'") 'The main menu must expose the preflight action.'
+Assert-True ($menu -match "'SetLanguage'") 'The main menu must expose interface language settings.'
+Assert-True ((Test-Path -LiteralPath (Join-Path $repoRoot 'scripts\actions\Test-LightsailPreflight.ps1'))) 'The preflight action must exist.'
+
 $values = @{
   SERVER_IP = '203.0.113.10'
   NODE_NAME = 'template-test'
