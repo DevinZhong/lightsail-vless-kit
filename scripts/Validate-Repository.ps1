@@ -50,6 +50,9 @@ $switchRegion = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\actions\S
 Assert-True ($switchRegion -match 'get-regions --include-availability-zones') 'Region selection must query Lightsail regions dynamically.'
 Assert-True ($switchRegion -match 'Target validation passed\. Deleting old') 'Region migration must validate the target before deleting the source instance.'
 
+$rebuild = Get-Content -LiteralPath (Join-Path $repoRoot 'scripts\actions\Rebuild-LightsailProxy.ps1') -Raw
+Assert-True ($rebuild -match 'Wait-InstanceDeleted') 'Rebuild must wait for instance deletion instead of relying only on a fixed delay.'
+
 $values = @{
   SERVER_IP = '203.0.113.10'
   NODE_NAME = 'template-test'
